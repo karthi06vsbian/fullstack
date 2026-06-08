@@ -8,12 +8,7 @@ from django.conf import settings
 
 def create_razorpay_order(order):
     if not settings.RAZORPAY_KEY_ID or not settings.RAZORPAY_KEY_SECRET:
-        return {
-            "id": f"dev_rzp_{order.id}",
-            "amount": int(order.total * 100),
-            "currency": "INR",
-            "dev_mode": True,
-        }
+        raise ValueError("Razorpay keys are missing")
 
     import razorpay
 

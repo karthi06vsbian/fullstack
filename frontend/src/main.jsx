@@ -68,7 +68,14 @@ async function api(path, options = {}) {
     headers: { "Content-Type": "application/json", ...(options.headers || {}) },
     ...options,
   });
-  const data = await response.json();
+  const text = await response.text();
+  let data = {};
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch {
+    const htmlError = text.trim().startsWith("<");
+    throw new Error(htmlError ? "Backend returned a server error page. Please redeploy/restart the Render backend and check Razorpay settings." : text || "Request failed");
+  }
   if (!response.ok) throw new Error(data.error || "Request failed");
   return data;
 }

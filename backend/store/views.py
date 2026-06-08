@@ -233,6 +233,8 @@ def create_order(request):
 
     try:
         payment_method = data.get("payment_method", "razorpay")
+        if payment_method not in {"razorpay", "cod"}:
+            return JsonResponse({"error": "Choose Razorpay or Cash on Delivery."}, status=400)
         shipping = calculate_shipping(customer["pincode"], weight, subtotal, payment_method)
     except ValueError as exc:
         return JsonResponse({"error": str(exc)}, status=400)
@@ -265,7 +267,13 @@ def create_order(request):
 
     razorpay_payload = {"key": settings.RAZORPAY_KEY_ID, "order_id": "", "amount": int(order.total * 100), "currency": "INR"}
     if payment_method == "razorpay":
-        razorpay_order = create_razorpay_order(order)
+        try:
+            razorpay_order = create_razorpay_order(order)
+        except Exception as exc:
+            transaction.set_rollback(True)
+            return JsonResponse({
+                "error": f"Razorpay order could not be created: {exc}. Check RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in Render, then restart the backend."
+            }, status=502)
         order.razorpay_order_id = razorpay_order["id"]
         order.save(update_fields=["razorpay_order_id"])
         razorpay_payload["order_id"] = order.razorpay_order_id
