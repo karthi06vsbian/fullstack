@@ -22,7 +22,8 @@ const MEDIA_BASE = API_BASE.replace("/api", "");
 const WHATSAPP_NUMBER = "919944823602";
 const PRODUCT_SUPPORT_NUMBER = "99448 23602";
 const CREDIT_CONTACT_NUMBER = "87786 06059";
-const INSTAGRAM_ID = "kxrxtxi__";
+const CONTACT_INSTAGRAM_ID = "ashhhh.io";
+const CREDIT_INSTAGRAM_ID = "kxrxtxi__";
 const BRAND_NAME = "XTRUDE";
 const BRAND_FULL_NAME = "XTRUDE 3D";
 const CATALOG_PREVIEW_LIMIT = 8;
@@ -697,7 +698,7 @@ function SiteFooter() {
       <div>
         <h3>Contact</h3>
         <a href={`https://wa.me/${WHATSAPP_NUMBER}?text=Hi%20${BRAND_NAME}%2C%20I%20need%20help%20with%20a%203D%20print%20order.`} target="_blank" rel="noreferrer">Orders WhatsApp: +91 {PRODUCT_SUPPORT_NUMBER}</a>
-        <a href={`https://www.instagram.com/${INSTAGRAM_ID}/`} target="_blank" rel="noreferrer">Instagram: @{INSTAGRAM_ID}</a>
+        <a href={`https://www.instagram.com/${CONTACT_INSTAGRAM_ID}/`} target="_blank" rel="noreferrer">Instagram: @{CONTACT_INSTAGRAM_ID}</a>
         <span>Product Support: +91 {PRODUCT_SUPPORT_NUMBER}</span>
         <span>Hub: Coimbatore, Tamil Nadu</span>
       </div>
@@ -705,7 +706,7 @@ function SiteFooter() {
         <h3>Credits</h3>
         <p>This website is built by Karthikeyan B.E CSE.</p>
         <p>Contact: +91 {CREDIT_CONTACT_NUMBER}</p>
-        <p>Instagram: @{INSTAGRAM_ID}</p>
+        <p>Instagram: @{CREDIT_INSTAGRAM_ID}</p>
         <p>© {year} {BRAND_FULL_NAME}. All rights reserved.</p>
       </div>
     </footer>
