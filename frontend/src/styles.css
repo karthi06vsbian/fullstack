@@ -732,6 +732,12 @@ input {
   color: #065f46;
 }
 
+.warning-message {
+  background: #fff7ed;
+  color: #9a3412;
+  border: 1px solid #fed7aa;
+}
+
 .success-panel {
   display: grid;
   justify-items: center;

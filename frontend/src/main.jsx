@@ -595,7 +595,7 @@ function AdminDashboard({ onClose, onProductUpdated }) {
     } catch (err) {
       setAuthed(false);
       localStorage.removeItem("printforgeAdminPassword");
-      setError(err.message || "Admin API is unavailable. Start Django + MySQL to view live orders.");
+      setError(`${err.message || "Admin API is unavailable. Start Django + MySQL to view live orders."} If this happens on Vercel, redeploy the Render backend after adding the Vercel URL to CORS_ALLOWED_ORIGINS.`);
     }
   }
 
@@ -634,6 +634,7 @@ function AdminDashboard({ onClose, onProductUpdated }) {
   const stats = summary?.stats || { orders: 0, revenue: 0, products: 0, cod_orders: 0, razorpay_orders: 0 };
   const orders = summary?.recent_orders || [];
   const editableProducts = summary?.products || [];
+  const backendHasNoProducts = authed && editableProducts.length === 0;
 
   return (
     <div className="drawer-backdrop">
@@ -682,29 +683,36 @@ function AdminDashboard({ onClose, onProductUpdated }) {
           <div className="admin-section">
             <h3>Products by Category</h3>
             <div className="category-report">
-              {(summary?.category_counts || []).map((item) => <span key={item.category}>{item.category}: <b>{item.count}</b></span>)}
+              {(summary?.category_counts || []).length === 0 ? <p className="empty">No product categories found in the backend database.</p> : (summary?.category_counts || []).map((item) => <span key={item.category}>{item.category}: <b>{item.count}</b></span>)}
             </div>
           </div>
           <div className="admin-section">
             <h3>Edit Products</h3>
-            <div className="product-editor-list">
-              {editableProducts.map((product) => (
-                <article className="product-editor" key={product.id}>
-                  <img src={imageUrl(product.image)} alt={product.name} />
-                  <label>
-                    Name
-                    <input value={product.name} onChange={(event) => updateProductDraft(product.id, "name", event.target.value)} />
-                  </label>
-                  <label>
-                    Price
-                    <input type="number" min="0" value={product.price} onChange={(event) => updateProductDraft(product.id, "price", event.target.value)} />
-                  </label>
-                  <button className="btn secondary" onClick={() => saveProduct(product)} disabled={savingId === product.id}>
-                    {savingId === product.id ? "Saving" : "Save"}
-                  </button>
-                </article>
-              ))}
-            </div>
+            {backendHasNoProducts && (
+              <div className="message warning-message">
+                Product list was not found in the live backend database. Run `python manage.py migrate` and `python manage.py seed_products` in the Render backend shell, then reopen this admin panel.
+              </div>
+            )}
+            {!backendHasNoProducts && (
+              <div className="product-editor-list">
+                {editableProducts.map((product) => (
+                  <article className="product-editor" key={product.id}>
+                    <img src={imageUrl(product.image)} alt={product.name} />
+                    <label>
+                      Name
+                      <input value={product.name} onChange={(event) => updateProductDraft(product.id, "name", event.target.value)} />
+                    </label>
+                    <label>
+                      Price
+                      <input type="number" min="0" value={product.price} onChange={(event) => updateProductDraft(product.id, "price", event.target.value)} />
+                    </label>
+                    <button className="btn secondary" onClick={() => saveProduct(product)} disabled={savingId === product.id}>
+                      {savingId === product.id ? "Saving" : "Save"}
+                    </button>
+                  </article>
+                ))}
+              </div>
+            )}
           </div>
           </>
         )}
