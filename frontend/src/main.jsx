@@ -12,21 +12,17 @@ import {
   Truck,
   Zap,
 } from "lucide-react";
+import localProducts from "./localProducts";
 import "./styles.css";
 
-const API_BASE = import.meta.env.VITE_API_BASE || "https://fullstack-zt6v.onrender.com";
+const API_BASE = import.meta.env.VITE_API_BASE || "http://127.0.0.1:8000/api";
 const MEDIA_BASE = API_BASE.replace("/api", "");
 const WHATSAPP_NUMBER = "919944823602";
 const PRODUCT_SUPPORT_NUMBER = "99448 23602";
 const CREDIT_CONTACT_NUMBER = "87786 06059";
 const INSTAGRAM_ID = "kxrxtxi__";
 
-const fallbackProducts = [
-  { id: 1, name: "Mini Me Custom Figure", category: "Mini Me", price: 1499, rating: 4.9, image: "/productsimg/minime.jpg", material: "Resin / PLA", weight_grams: 350, is_featured: true, is_custom: true, description: "Custom lifelike miniature from your photo." },
-  { id: 2, name: "Name Keychain", category: "Keychains", price: 179, rating: 4.8, image: "/productsimg/keychains/keychain1.jpg", material: "PLA", weight_grams: 80, is_featured: true, description: "Personalized lightweight name keychain." },
-  { id: 3, name: "Desk Planter", category: "Home Decor", price: 499, rating: 4.9, image: "/productsimg/home-decor/desk-planter.jpg", material: "Matte PLA", weight_grams: 420, is_featured: true, description: "Modern planter for desks and shelves." },
-  { id: 4, name: "Fidget Toy V2", category: "Toys", price: 279, rating: 4.8, image: "/productsimg/toys/fidget-toy-v2-cut.jpg", material: "PETG", weight_grams: 180, is_featured: true, description: "Smooth articulated fidget print." },
-];
+const fallbackProducts = localProducts;
 
 function rupees(amount) {
   return new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(amount || 0);
@@ -77,10 +73,35 @@ async function api(path, options = {}) {
   return data;
 }
 
+function normalizeCategory(category) {
+  const labels = {
+    "home decor": "Home Decor",
+    keychains: "Keychains",
+    pets: "Pets",
+    projects: "Projects",
+    toys: "Toys",
+    "useful appliances": "Useful Appliances",
+    "mini me": "Mini Me",
+  };
+  return labels[String(category || "").trim().toLowerCase()] || category || "Products";
+}
+
+function hasUsableImage(product) {
+  return product.image && !["/media/none", "none", "/media/", ""].includes(String(product.image).trim());
+}
+
+function normalizeProduct(product) {
+  return { ...product, category: normalizeCategory(product.category) };
+}
+
+function cleanProducts(items) {
+  return items.map(normalizeProduct).filter(hasUsableImage);
+}
+
 function App() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [activeCategory, setActiveCategory] = useState("Top Selling");
+  const [activeCategory, setActiveCategory] = useState("All");
   const [query, setQuery] = useState("");
   const [cart, setCart] = useState([]);
   const [checkoutOpen, setCheckoutOpen] = useState(false);
@@ -91,13 +112,17 @@ function App() {
   useEffect(() => {
     api("/products/")
       .then((data) => {
-        setProducts(data.products);
-        setCategories(["Top Selling", "All", ...data.categories.filter((category) => category !== "Mini Me")]);
+        const cleanedProducts = cleanProducts(data.products);
+        const categoryList = [...new Set(cleanedProducts.map((product) => product.category))].sort();
+        setProducts(cleanedProducts);
+        setCategories(["All", ...categoryList.filter((category) => category !== "Mini Me")]);
       })
       .catch(() => {
-        setProducts(fallbackProducts);
-        setCategories(["Top Selling", "All", "Keychains", "Home Decor", "Toys"]);
-        setNotice("Backend offline: showing demo catalog.");
+        const cleanedProducts = cleanProducts(fallbackProducts);
+        const categoryList = [...new Set(cleanedProducts.map((product) => product.category))].sort();
+        setProducts(cleanedProducts);
+        setCategories(["All", ...categoryList.filter((category) => category !== "Mini Me")]);
+        setNotice("Backend offline: showing permanent local product catalog.");
       });
   }, []);
 
@@ -108,7 +133,6 @@ function App() {
   }, [products]);
 
   const filtered = useMemo(() => {
-    if (activeCategory === "Top Selling") return topSellingProducts;
     return products.filter((product) => {
       if (product.category === "Mini Me") return false;
       const categoryMatch = activeCategory === "All" || product.category === activeCategory;
@@ -159,6 +183,7 @@ function App() {
         </section>
         <section id="shop" className="shop-shell">
           <MiniMeSpotlight product={miniMe} />
+          <TopSellingSection products={topSellingProducts} onAdd={addToCart} onBuy={buyNow} />
           <div className="shop-toolbar">
             <div>
               <p className="eyebrow">Full Ecommerce Catalog</p>
@@ -197,7 +222,7 @@ function App() {
           onClear={() => setCart([])}
         />
       )}
-      {adminOpen && <AdminDashboard onClose={() => setAdminOpen(false)} onProductUpdated={(updated) => setProducts((items) => items.map((item) => item.id === updated.id ? updated : item))} />}
+      {adminOpen && <AdminDashboard onClose={() => setAdminOpen(false)} onProductUpdated={(updated) => setProducts((items) => items.map((item) => item.id === updated.id ? normalizeProduct(updated) : item).filter(hasUsableImage))} />}
     </div>
   );
 }
@@ -246,6 +271,25 @@ function MiniMeSpotlight({ product }) {
   );
 }
 
+function TopSellingSection({ products, onAdd, onBuy }) {
+  if (!products.length) return null;
+  return (
+    <section className="top-selling-section">
+      <div className="shop-toolbar compact-toolbar">
+        <div>
+          <p className="eyebrow">Top Selling</p>
+          <h2>5 popular custom products.</h2>
+        </div>
+      </div>
+      <div className="product-grid top-selling-grid">
+        {products.slice(0, 5).map((product) => (
+          <ProductCard key={product.id} product={product} onAdd={onAdd} onBuy={onBuy} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function Hero({ onShop }) {
   return (
     <header className="hero">
@@ -272,7 +316,8 @@ function Feature({ icon, title, text }) {
 function imageUrl(path) {
   if (!path) return "";
   if (path.startsWith("http")) return path;
-  if (path.startsWith("/media") || path.startsWith("/productsimg")) return `${MEDIA_BASE}${path}`;
+  if (path.startsWith("/productsimg")) return path;
+  if (path.startsWith("/media")) return `${MEDIA_BASE}${path}`;
   return path;
 }
 
@@ -535,7 +580,7 @@ function AdminDashboard({ onClose, onProductUpdated }) {
     }
     try {
       const data = await api("/admin/summary/", { headers: { "X-Admin-Password": cleanPassword } });
-      setSummary(data);
+      setSummary({ ...data, products: cleanProducts(data.products || []) });
       setAuthed(true);
       setPassword(cleanPassword);
       localStorage.setItem("printforgeAdminPassword", cleanPassword);
@@ -568,9 +613,9 @@ function AdminDashboard({ onClose, onProductUpdated }) {
       });
       setSummary((current) => ({
         ...current,
-        products: current.products.map((item) => item.id === data.product.id ? data.product : item),
+        products: current.products.map((item) => item.id === data.product.id ? normalizeProduct(data.product) : item),
       }));
-      onProductUpdated(data.product);
+      onProductUpdated(normalizeProduct(data.product));
     } catch (err) {
       setError(err.message || "Could not save product.");
     } finally {

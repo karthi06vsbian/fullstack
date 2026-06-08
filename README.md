@@ -5,6 +5,8 @@ PrintForge is now structured as a fullstack ecommerce app:
 - `frontend/` - React + Vite storefront
 - `backend/` - Django API with MySQL database configuration
 - `productsimg/` and `assets/` - existing product images and video assets reused by the new app
+- `frontend/public/productsimg/` - permanent frontend copy of product images for fallback/local display
+- `frontend/src/localProducts.js` - permanent local catalog generated from `productsimg/`
 
 ## Features
 
@@ -42,6 +44,12 @@ python3 manage.py runserver 8000
 ```
 
 Run `python3 manage.py seed_products` again any time you add images under `productsimg/`; it imports every product image into the correct category folder.
+
+If you add new product images, also copy them into the React public folder so the fallback catalog remains permanent:
+
+```bash
+rsync -av productsimg/ frontend/public/productsimg/
+```
 
 Add live keys in `backend/.env`:
 

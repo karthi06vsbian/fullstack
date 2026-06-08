@@ -272,6 +272,18 @@ h2 {
   margin-bottom: 22px;
 }
 
+.compact-toolbar {
+  margin-bottom: 16px;
+}
+
+.top-selling-section {
+  margin-bottom: 54px;
+}
+
+.top-selling-grid {
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+
 .search {
   display: flex;
   align-items: center;
