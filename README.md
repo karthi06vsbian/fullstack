@@ -60,6 +60,7 @@ SHIPROCKET_EMAIL=
 SHIPROCKET_PASSWORD=
 WHATSAPP_NUMBER=919944823602
 ADMIN_PANEL_PASSWORD=admin123
+CORS_ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173,https://fullstack-zt6v.onrender.com
 ```
 
 Without Razorpay or Shiprocket credentials, the backend returns development IDs so the order flow can still be tested.
@@ -79,3 +80,42 @@ Set a different API base if needed:
 ```bash
 VITE_API_BASE=http://localhost:8000/api npm run dev
 ```
+
+## Render Connection
+
+The deployed backend URL is:
+
+```text
+https://fullstack-zt6v.onrender.com
+```
+
+The frontend must use the API base with `/api`:
+
+```text
+https://fullstack-zt6v.onrender.com/api
+```
+
+For Render backend, set these environment variables:
+
+```bash
+DJANGO_SECRET_KEY=your-secret
+DJANGO_DEBUG=0
+DJANGO_ALLOWED_HOSTS=fullstack-zt6v.onrender.com
+CORS_ALLOWED_ORIGINS=http://localhost:5173,http://127.0.0.1:5173,https://your-frontend-domain.com
+MYSQL_DATABASE=...
+MYSQL_USER=...
+MYSQL_PASSWORD=...
+MYSQL_HOST=...
+MYSQL_PORT=3306
+WHATSAPP_NUMBER=919944823602
+ADMIN_PANEL_PASSWORD=admin123
+```
+
+After deploying backend, run migrations and seed products on Render:
+
+```bash
+python backend/manage.py migrate
+python backend/manage.py seed_products
+```
+
+If your Render product API returns `{"products": [], "categories": []}`, the backend database has not been seeded yet.
