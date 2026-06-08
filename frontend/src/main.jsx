@@ -385,6 +385,7 @@ function TopSellingSection({ products, onAdd, onBuy }) {
 }
 
 function OurWorksShowcase() {
+  const showcaseImages = [...ourWorkImages, ...ourWorkImages];
   return (
     <section className="our-works-section">
       <div className="shop-toolbar compact-toolbar">
@@ -393,10 +394,12 @@ function OurWorksShowcase() {
           <h2>Customization showcase.</h2>
         </div>
       </div>
-      <div className="our-works-grid">
-        {ourWorkImages.map((image, index) => (
-          <img key={image} src={image} alt={`XTRUDE 3D custom work ${index + 1}`} loading="lazy" />
-        ))}
+      <div className="our-works-slider">
+        <div className="our-works-track">
+          {showcaseImages.map((image, index) => (
+            <img key={`${image}-${index}`} src={image} alt={`XTRUDE 3D custom work ${(index % ourWorkImages.length) + 1}`} loading="lazy" />
+          ))}
+        </div>
       </div>
     </section>
   );
