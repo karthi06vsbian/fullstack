@@ -24,6 +24,7 @@ const INSTAGRAM_ID = "kxrxtxi__";
 const BRAND_NAME = "XTRUDE";
 const BRAND_FULL_NAME = "XTRUDE 3D";
 const CATALOG_PREVIEW_LIMIT = 8;
+const ourWorkImages = Array.from({ length: 15 }, (_, index) => `/our-works/work-${String(index + 1).padStart(2, "0")}.jpeg`);
 
 const fallbackProducts = localProducts;
 
@@ -295,6 +296,7 @@ function App() {
               </button>
             </div>
           )}
+          <OurWorksShowcase />
         </section>
         <Reviews />
       </main>
@@ -376,6 +378,24 @@ function TopSellingSection({ products, onAdd, onBuy }) {
       <div className="product-grid top-selling-grid">
         {products.slice(0, 5).map((product, index) => (
           <ProductCard key={product.id} product={product} onAdd={onAdd} onBuy={onBuy} index={index} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function OurWorksShowcase() {
+  return (
+    <section className="our-works-section">
+      <div className="shop-toolbar compact-toolbar">
+        <div>
+          <p className="eyebrow">Our Works</p>
+          <h2>Customization showcase.</h2>
+        </div>
+      </div>
+      <div className="our-works-grid">
+        {ourWorkImages.map((image, index) => (
+          <img key={image} src={image} alt={`XTRUDE 3D custom work ${index + 1}`} loading="lazy" />
         ))}
       </div>
     </section>

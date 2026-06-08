@@ -280,6 +280,24 @@ h2 {
   margin-bottom: 54px;
 }
 
+.our-works-section {
+  margin-top: 64px;
+}
+
+.our-works-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 12px;
+}
+
+.our-works-grid img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 8px;
+  background: var(--soft);
+}
+
 .top-selling-grid {
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
 }
