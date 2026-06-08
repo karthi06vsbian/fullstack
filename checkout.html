@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Checkout | PrintForge</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+  <nav class="nav" data-nav></nav>
+  <header class="page-hero"><div class="container"><p class="eyebrow">Checkout</p><h1>Confirm your print order.</h1></div></header>
+  <main class="section">
+    <div class="container checkout-layout">
+      <form class="checkout-box stack" data-checkout-form>
+        <h2>WhatsApp Order Details</h2>
+        <div class="form-row"><input class="input" name="first_name" placeholder="First name" required><input class="input" name="last_name" placeholder="Last name" required></div>
+        <input class="input" name="phone" placeholder="Phone number" required>
+        <input class="input" name="address" placeholder="Address" required>
+        <div class="form-row"><input class="input" name="city" placeholder="City" required><input class="input" name="postal_code" placeholder="Postal code" required></div>
+        <div class="payment-options">
+          <div class="payment-option">
+            <span><strong>Cash on Delivery available</strong><small>Product prices stay the same. Shipping charge depends on your delivery location and will be confirmed on WhatsApp.</small></span>
+          </div>
+        </div>
+        <input type="hidden" name="total" value="0" data-checkout-total-input>
+        <input type="hidden" name="items" value="3D print order" data-checkout-items-input>
+        <button class="btn" type="submit">Place Order on WhatsApp</button>
+        <p class="checkout-note" data-checkout-message></p>
+      </form>
+      <aside class="checkout-box sticky-buy"><h2>Summary</h2><p data-checkout-items-label>Your cart items</p><h3 data-checkout-total-label>₹0</h3><p>Product price total only. Cash on Delivery is available. Shipping charge depends on your location and is confirmed on WhatsApp.</p><a class="btn secondary" href="cart.html">Edit Cart</a></aside>
+    </div>
+  </main>
+  <footer class="footer" data-footer></footer>
+  <script src="assets/js/main.js"></script>
+</body>
+</html>

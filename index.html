@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="PrintForge creates premium 3D printed keychains, toys, useful appliances, projects, home decor, and custom products.">
+  <title>PrintForge | Premium 3D Printed Products</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+  <nav class="nav" data-nav></nav>
+
+  <header class="hero print-hero">
+    <video class="hero-video" autoplay muted loop playsinline poster="https://images.unsplash.com/photo-1631378426482-54edfe73115b?auto=format&fit=crop&w=2200&q=82">
+      <source src="assets/video/3d-printer-entrance.mp4" type="video/mp4">
+    </video>
+    <div class="container hero-panel">
+      <p class="eyebrow">Premium 3D printing studio</p>
+      <h1>Print custom products that feel finished, not homemade.</h1>
+      <p>Shop 3D printed keychains, toys, useful appliances, projects, and home decor. Send a reference, name, logo, or STL file and customize it directly on WhatsApp.</p>
+      <div class="button-row">
+        <a class="btn" href="shop.html">Shop 3D Prints</a>
+        <a class="btn secondary" href="https://wa.me/6383263198?text=Hi%2C%20I%20want%20to%20customize%20a%203D%20printed%20product." target="_blank" rel="noopener">Customize on WhatsApp</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="entrance-video-section" aria-label="3D printer working video">
+      <video class="entrance-video" autoplay muted loop playsinline controls poster="https://images.unsplash.com/photo-1631378426482-54edfe73115b?auto=format&fit=crop&w=2200&q=82">
+        <source src="assets/video/3d-printer-entrance.mp4" type="video/mp4">
+      </video>
+      <div class="container entrance-caption">
+        <p class="eyebrow">Live print feel</p>
+        <h2>Watch the layer-by-layer process before you shop.</h2>
+      </div>
+    </section>
+
+    <!-- Mini Me Promo Section -->
+    <section class="container reveal" style="margin-top: 60px; margin-bottom: 80px;">
+      <div class="mini-me-promo">
+        <div class="mini-me-content">
+          <h2>Create Your "Mini Me"</h2>
+          <p>Send us your image and we'll convert it into a lifelike 3D printed miniature model! Perfect for gifts, memories, or custom cake toppers.</p>
+          <a href="https://wa.me/916383263198?text=Hi!%20I%20want%20to%20create%20a%20Mini%20Me" class="btn" target="_blank" rel="noopener">Customize on WhatsApp</a>
+        </div>
+        <div class="mini-me-image">
+          <!-- Using mix-blend-mode to remove white background naturally -->
+          <img src="productsimg/minime.jpg" alt="Mini Me Example" style="mix-blend-mode: multiply; max-width: 100%; height: auto; border-radius: var(--radius);">
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="products">
+      <div class="container">
+        <div class="section-head reveal">
+          <h2>Our Products</h2>
+          <p>Browse our extensive catalog of 3D printed products, ready for purchase or customization.</p>
+        </div>
+        <div class="product-grid" data-products data-limit="8"></div>
+      <div style="text-align: center; margin-top: 40px;">
+        <a href="shop.html" class="btn secondary">View All Products</a>
+      </div>
+    </section>
+
+    <section id="top-selling" class="container reveal" style="margin-bottom: 80px;">
+        <div class="section-head reveal">
+          <h2>Top Selling Products</h2>
+          <p>Our most popular 3D printed items, loved by our customers.</p>
+        </div>
+        <div class="product-grid" data-products data-category="Top Selling" data-limit="4"></div>
+      </div>
+    </section>
+
+    <section class="section soft">
+      <div class="container">
+        <div class="section-head reveal">
+          <h2>Maker Reviews</h2>
+          <p>Customers ordering keychains, toys, useful appliances, project parts, and decor.</p>
+        </div>
+        <div class="testimonial-track">
+          <article class="testimonial-card">
+            <div class="customer"><img loading="lazy" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=160&q=82" alt="Customer portrait"><strong>Mira Shah</strong></div>
+            <p class="rating">★★★★★</p><p>My name keychains came out clean, strong, and ready for gifting.</p>
+          </article>
+          <article class="testimonial-card">
+            <div class="customer"><img loading="lazy" src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=160&q=82" alt="Customer portrait"><strong>Arjun Mehta</strong></div>
+            <p class="rating">★★★★★</p><p>They printed useful clips for my desk and helped choose the right filament.</p>
+          </article>
+          <article class="testimonial-card">
+            <div class="customer"><img loading="lazy" src="https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=160&q=82" alt="Customer portrait"><strong>Leah Carter</strong></div>
+            <p class="rating">★★★★★</p><p>My school project part was printed quickly and the WhatsApp updates were clear.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="newsletter reveal">
+          <p class="eyebrow">Custom print help</p>
+          <h2>Have a model or idea?</h2>
+          <p>Send it on WhatsApp for price, material advice, print time, and finishing options.</p>
+          <form class="newsletter-form">
+            <input class="input" type="email" placeholder="Email address" aria-label="Email address">
+            <a class="btn" href="https://wa.me/6383263198?text=Hi%2C%20I%20want%20help%20with%20a%203D%20printing%20custom%20order." target="_blank" rel="noopener">Chat on WhatsApp</a>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer" data-footer></footer>
+  <script src="assets/js/main.js"></script>
+</body>
+</html>

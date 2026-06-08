@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Track My Order | PrintForge</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+  <nav class="nav" data-nav></nav>
+  <header class="page-hero">
+    <div class="container">
+      <p class="eyebrow">Tracking</p>
+      <h1>Track my order.</h1>
+      <p>Enter your PrintForge tracking code to see print, packing, and delivery status.</p>
+    </div>
+  </header>
+  <main class="section">
+    <div class="container auth-layout">
+      <form class="auth-card stack" data-track-form>
+        <h2>Order Status</h2>
+        <input class="input" name="tracking_code" placeholder="Example: PF202606071234" required>
+        <button class="btn" type="submit">Track Order</button>
+        <div class="tracking-result" data-tracking-result></div>
+      </form>
+    </div>
+  </main>
+  <footer class="footer" data-footer></footer>
+  <script src="assets/js/main.js"></script>
+</body>
+</html>
