@@ -110,28 +110,37 @@ function App() {
   const [notice, setNotice] = useState("");
 
   useEffect(() => {
-    api("/products/")
-      .then((data) => {
+    async function loadProducts() {
+      const useLocalCatalog = (statusMessage) => {
+        const cleanedProducts = cleanProducts(fallbackProducts);
+        const categoryList = [...new Set(cleanedProducts.map((product) => product.category))].sort();
+        setProducts(cleanedProducts);
+        setCategories(["All", ...categoryList.filter((category) => category !== "Mini Me")]);
+        setNotice(statusMessage);
+      };
+
+      try {
+        const data = await api("/products/");
         const cleanedProducts = cleanProducts(data.products);
         if (!cleanedProducts.length) {
-          const localCatalog = cleanProducts(fallbackProducts);
-          const categoryList = [...new Set(localCatalog.map((product) => product.category))].sort();
-          setProducts(localCatalog);
-          setCategories(["All", ...categoryList.filter((category) => category !== "Mini Me")]);
-          setNotice("Backend connected, but Render database has no products yet. Showing permanent local product catalog.");
+          useLocalCatalog("Backend connected. Render product database needs seeding, so the shop is showing the permanent local catalog.");
           return;
         }
         const categoryList = [...new Set(cleanedProducts.map((product) => product.category))].sort();
         setProducts(cleanedProducts);
         setCategories(["All", ...categoryList.filter((category) => category !== "Mini Me")]);
-      })
-      .catch(() => {
-        const cleanedProducts = cleanProducts(fallbackProducts);
-        const categoryList = [...new Set(cleanedProducts.map((product) => product.category))].sort();
-        setProducts(cleanedProducts);
-        setCategories(["All", ...categoryList.filter((category) => category !== "Mini Me")]);
-        setNotice("Backend offline: showing permanent local product catalog.");
-      });
+        setNotice("");
+      } catch (error) {
+        try {
+          await api("/health/");
+          useLocalCatalog("Backend connected. Product catalog API is not ready, so the shop is showing the permanent local catalog.");
+        } catch {
+          useLocalCatalog("Using permanent local product catalog while the backend wakes up or redeploys.");
+        }
+      }
+    }
+
+    loadProducts();
   }, []);
 
   const topSellingProducts = useMemo(() => {
@@ -390,7 +399,7 @@ function Checkout({ cart, totals, quote, setQuote, updateQty, onClose, onClear }
       try {
         const localQuote = localShippingQuote(customer.pincode, totals.weight, totals.subtotal, paymentMethod);
         setQuote(localQuote);
-        if (!silent) setMessage("Backend offline: showing demo shipping calculation.");
+        if (!silent) setMessage("Using local shipping estimate while the live shipping API is unavailable.");
       } catch (quoteError) {
         if (!silent) setMessage(quoteError.message || error.message);
       }
@@ -676,7 +685,7 @@ function AdminDashboard({ onClose, onProductUpdated }) {
           <>
           <div className="admin-stats">
             <Stat label="Orders" value={stats.orders} />
-            <Stat label="Revenue" value={rupees(stats.revenue)} />
+            <Stat label="Total Amount" value={rupees(stats.revenue)} />
             <Stat label="Products" value={stats.products} />
             <Stat label="COD Orders" value={stats.cod_orders} />
             <Stat label="Razorpay" value={stats.razorpay_orders} />
@@ -691,8 +700,10 @@ function AdminDashboard({ onClose, onProductUpdated }) {
                     <span>{order.customer_name} · {order.phone}</span>
                     <small>{order.address_line}, {order.city}, {order.state} - {order.pincode}</small>
                   </div>
-                  <div>
-                    <b>{rupees(order.total)}</b>
+                  <div className="order-amounts">
+                    <b>Total: {rupees(order.total)}</b>
+                    <span>Product: {rupees(order.subtotal)}</span>
+                    <span>Shipping/COD: {rupees(order.shipping_charge)}</span>
                     <span>{order.payment_method.toUpperCase()} · {order.status}</span>
                   </div>
                 </article>

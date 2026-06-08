@@ -425,7 +425,7 @@ h2 {
 
 .admin-stats {
   display: grid;
-  grid-template-columns: repeat(5, minmax(120px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 10px;
   margin-bottom: 24px;
 }
@@ -483,6 +483,11 @@ h2 {
 
 .admin-order small {
   max-width: 620px;
+}
+
+.order-amounts {
+  min-width: 160px;
+  text-align: right;
 }
 
 .category-report {
