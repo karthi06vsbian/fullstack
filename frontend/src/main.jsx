@@ -269,6 +269,7 @@ function App() {
         </section>
         <section id="shop" className="shop-shell">
           <MiniMeSpotlight product={miniMe} />
+          <OurWorksShowcase />
           <TopSellingSection products={topSellingProducts} onAdd={addToCart} onBuy={buyNow} />
           <div className="shop-toolbar">
             <div>
@@ -299,7 +300,6 @@ function App() {
               </button>
             </div>
           )}
-          <OurWorksShowcase />
         </section>
         <Reviews />
       </main>
