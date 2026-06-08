@@ -812,7 +812,6 @@ function AdminDashboard({ onClose, onProductUpdated }) {
               <input type="password" value={password} onChange={(event) => setPassword(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") loadAdmin(password); }} placeholder="Enter admin password" />
             </label>
             <button className="btn wide-button" onClick={() => loadAdmin(password)}>Login</button>
-            <p>Default local password is `admin123`. Change it in backend/.env with ADMIN_PANEL_PASSWORD.</p>
           </div>
         ) : (
           <>
