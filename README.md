@@ -1,6 +1,6 @@
-# PrintForge Fullstack Ecommerce
+# XTRUDE 3D Fullstack Ecommerce
 
-PrintForge is now structured as a fullstack ecommerce app:
+XTRUDE 3D is structured as a fullstack ecommerce app:
 
 - `frontend/` - React + Vite storefront
 - `backend/` - Django API with MySQL database configuration

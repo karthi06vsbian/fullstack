@@ -164,7 +164,7 @@ def order_json(order):
 
 @require_GET
 def health(_request):
-    return JsonResponse({"status": "ok", "app": "PrintForge API"})
+    return JsonResponse({"status": "ok", "app": "XTRUDE 3D API"})
 
 
 @require_GET
@@ -325,7 +325,7 @@ def verify_payment(request):
 def whatsapp_link(request):
     message = request.GET.get(
         "message",
-        "Hi PrintForge, I need help with a 3D printed product order.",
+        "Hi XTRUDE, I need help with a 3D printed product order.",
     )
     return JsonResponse({"url": f"https://wa.me/{settings.WHATSAPP_NUMBER}?text={quote(message)}"})
 

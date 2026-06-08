@@ -59,7 +59,7 @@ def unique_slug(base):
 
 
 class Command(BaseCommand):
-    help = "Seed every product image into the PrintForge catalog"
+    help = "Seed every product image into the XTRUDE 3D catalog"
 
     def handle(self, *args, **options):
         root = settings.ROOT_DIR / "productsimg"

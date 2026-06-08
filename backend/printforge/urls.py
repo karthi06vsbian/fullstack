@@ -7,7 +7,7 @@ from django.urls import include, path
 
 def api_root(_request):
     return JsonResponse({
-        "app": "PrintForge backend",
+        "app": "XTRUDE 3D backend",
         "status": "ok",
         "endpoints": {
             "health": "/api/health/",

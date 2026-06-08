@@ -21,6 +21,9 @@ const WHATSAPP_NUMBER = "919944823602";
 const PRODUCT_SUPPORT_NUMBER = "99448 23602";
 const CREDIT_CONTACT_NUMBER = "87786 06059";
 const INSTAGRAM_ID = "kxrxtxi__";
+const BRAND_NAME = "XTRUDE";
+const BRAND_FULL_NAME = "XTRUDE 3D";
+const CATALOG_PREVIEW_LIMIT = 8;
 
 const fallbackProducts = localProducts;
 
@@ -162,6 +165,7 @@ function App() {
   const [adminOpen, setAdminOpen] = useState(false);
   const [quote, setQuote] = useState(null);
   const [notice, setNotice] = useState("");
+  const [showAllCatalog, setShowAllCatalog] = useState(false);
 
   useEffect(() => {
     async function loadProducts() {
@@ -212,6 +216,12 @@ function App() {
       return categoryMatch && searchMatch;
     });
   }, [products, activeCategory, query, topSellingProducts]);
+
+  const visibleProducts = showAllCatalog ? filtered : filtered.slice(0, CATALOG_PREVIEW_LIMIT);
+
+  useEffect(() => {
+    setShowAllCatalog(false);
+  }, [activeCategory, query]);
 
   const totals = useMemo(() => {
     const subtotal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
@@ -274,10 +284,17 @@ function App() {
             ))}
           </div>
           <div className="product-grid">
-            {filtered.map((product) => (
-              <ProductCard key={product.id} product={product} onAdd={addToCart} onBuy={buyNow} />
+            {visibleProducts.map((product, index) => (
+              <ProductCard key={product.id} product={product} onAdd={addToCart} onBuy={buyNow} index={index} />
             ))}
           </div>
+          {filtered.length > CATALOG_PREVIEW_LIMIT && (
+            <div className="catalog-actions">
+              <button className="btn secondary" onClick={() => setShowAllCatalog((current) => !current)}>
+                {showAllCatalog ? "Show less" : `View all ${filtered.length} products`}
+              </button>
+            </div>
+          )}
         </section>
         <Reviews />
       </main>
@@ -314,11 +331,11 @@ function OfferTicker() {
 function Nav({ cartCount, onCart, onAdmin }) {
   return (
     <nav className="nav">
-      <a className="logo" href="#">PrintForge<span> 3D</span></a>
+      <a className="logo" href="#">{BRAND_NAME}<span> 3D</span></a>
       <div className="nav-links">
         <a href="#shop">Shop</a>
         <button className="admin-link" onClick={onAdmin}><LayoutDashboard size={18} /> Admin</button>
-        <a href={`https://wa.me/${WHATSAPP_NUMBER}?text=Hi%20PrintForge%2C%20I%20want%20a%20custom%203D%20print.`} target="_blank" rel="noreferrer">Customize</a>
+        <a href={`https://wa.me/${WHATSAPP_NUMBER}?text=Hi%20${BRAND_NAME}%2C%20I%20want%20a%20custom%203D%20print.`} target="_blank" rel="noreferrer">Customize</a>
         <button className="cart-button" onClick={onCart} title="Open cart">
           <ShoppingCart size={20} />
           {cartCount > 0 && <span>{cartCount}</span>}
@@ -335,7 +352,7 @@ function MiniMeSpotlight({ product }) {
         <p className="eyebrow">✨ Fully Customized Mini Me</p>
         <h2>Turn your photo into a personalized 3D miniature.</h2>
         <p>No fixed price for this one: every Mini Me is custom made by size, pose, finish, and photo quality. Send your image on WhatsApp and we will confirm the design and quote.</p>
-        <a className="btn ghost" href={`https://wa.me/${WHATSAPP_NUMBER}?text=Hi%20PrintForge%2C%20I%20want%20a%20fully%20customized%20Mini%20Me%203D%20model.`} target="_blank" rel="noreferrer">
+        <a className="btn ghost" href={`https://wa.me/${WHATSAPP_NUMBER}?text=Hi%20${BRAND_NAME}%2C%20I%20want%20a%20fully%20customized%20Mini%20Me%203D%20model.`} target="_blank" rel="noreferrer">
           <MessageCircle size={18} /> Buy on WhatsApp
         </a>
       </div>
@@ -357,8 +374,8 @@ function TopSellingSection({ products, onAdd, onBuy }) {
         </div>
       </div>
       <div className="product-grid top-selling-grid">
-        {products.slice(0, 5).map((product) => (
-          <ProductCard key={product.id} product={product} onAdd={onAdd} onBuy={onBuy} />
+        {products.slice(0, 5).map((product, index) => (
+          <ProductCard key={product.id} product={product} onAdd={onAdd} onBuy={onBuy} index={index} />
         ))}
       </div>
     </section>
@@ -373,11 +390,11 @@ function Hero({ onShop }) {
       </video>
       <div className="hero-copy">
         <p className="eyebrow">Premium 3D Printing Studio</p>
-        <h1>PrintForge</h1>
+        <h1>{BRAND_FULL_NAME}</h1>
         <p>Buy 3D printed products, enter your pincode for delivery charges, pay with Razorpay, and get fast delivery through Shiprocket.</p>
         <div className="hero-actions">
           <button className="btn" onClick={onShop}><Zap size={18} /> Shop Now</button>
-          <a className="btn ghost" href={`https://wa.me/${WHATSAPP_NUMBER}?text=Hi%20PrintForge%2C%20I%20want%20to%20customize%20a%203D%20printed%20product.`} target="_blank" rel="noreferrer"><MessageCircle size={18} /> WhatsApp</a>
+          <a className="btn ghost" href={`https://wa.me/${WHATSAPP_NUMBER}?text=Hi%20${BRAND_NAME}%2C%20I%20want%20to%20customize%20a%203D%20printed%20product.`} target="_blank" rel="noreferrer"><MessageCircle size={18} /> WhatsApp</a>
         </div>
       </div>
     </header>
@@ -396,9 +413,9 @@ function imageUrl(path) {
   return path;
 }
 
-function ProductCard({ product, onAdd, onBuy }) {
+function ProductCard({ product, onAdd, onBuy, index = 0 }) {
   return (
-    <article className="product-card">
+    <article className="product-card" style={{ "--card-delay": `${Math.min(index, 12) * 45}ms` }}>
       <div className="product-image">
         <img src={imageUrl(product.image)} alt={product.name} loading="lazy" />
         {product.is_custom && <span className="pill">Custom</span>}
@@ -515,7 +532,7 @@ function Checkout({ cart, totals, quote, setQuote, updateQty, onClose, onClear }
           key: data.razorpay.key,
           amount: data.razorpay.amount,
           currency: "INR",
-          name: "PrintForge",
+          name: BRAND_FULL_NAME,
           description: "3D printed products",
           order_id: data.razorpay.order_id,
           handler: async (response) => {
@@ -637,12 +654,12 @@ function SiteFooter() {
   return (
     <footer className="site-footer">
       <div>
-        <h2>PrintForge 3D</h2>
+        <h2>{BRAND_FULL_NAME}</h2>
         <p>Premium 3D printed products, custom Mini Me models, keychains, toys, useful appliances, projects, home decor, and fast delivery support.</p>
       </div>
       <div>
         <h3>Contact</h3>
-        <a href={`https://wa.me/${WHATSAPP_NUMBER}?text=Hi%20PrintForge%2C%20I%20need%20help%20with%20a%203D%20print%20order.`} target="_blank" rel="noreferrer">Orders WhatsApp: +91 {PRODUCT_SUPPORT_NUMBER}</a>
+        <a href={`https://wa.me/${WHATSAPP_NUMBER}?text=Hi%20${BRAND_NAME}%2C%20I%20need%20help%20with%20a%203D%20print%20order.`} target="_blank" rel="noreferrer">Orders WhatsApp: +91 {PRODUCT_SUPPORT_NUMBER}</a>
         <a href={`https://www.instagram.com/${INSTAGRAM_ID}/`} target="_blank" rel="noreferrer">Instagram: @{INSTAGRAM_ID}</a>
         <span>Product Support: +91 {PRODUCT_SUPPORT_NUMBER}</span>
         <span>Hub: Coimbatore, Tamil Nadu</span>
@@ -652,7 +669,7 @@ function SiteFooter() {
         <p>This website is built by Karthikeyan B.E CSE.</p>
         <p>Contact: +91 {CREDIT_CONTACT_NUMBER}</p>
         <p>Instagram: @{INSTAGRAM_ID}</p>
-        <p>© {year} PrintForge. All rights reserved.</p>
+        <p>© {year} {BRAND_FULL_NAME}. All rights reserved.</p>
       </div>
     </footer>
   );
@@ -660,7 +677,7 @@ function SiteFooter() {
 
 function AdminDashboard({ onClose, onProductUpdated }) {
   const [summary, setSummary] = useState(null);
-  const [password, setPassword] = useState(localStorage.getItem("printforgeAdminPassword") || "");
+  const [password, setPassword] = useState(localStorage.getItem("xtrudeAdminPassword") || "");
   const [authed, setAuthed] = useState(false);
   const [error, setError] = useState("");
   const [savingId, setSavingId] = useState(null);
@@ -677,10 +694,10 @@ function AdminDashboard({ onClose, onProductUpdated }) {
       setSummary({ ...data, products: adminProductCatalog(data.products || []) });
       setAuthed(true);
       setPassword(cleanPassword);
-      localStorage.setItem("printforgeAdminPassword", cleanPassword);
+      localStorage.setItem("xtrudeAdminPassword", cleanPassword);
     } catch (err) {
       setAuthed(false);
-      localStorage.removeItem("printforgeAdminPassword");
+      localStorage.removeItem("xtrudeAdminPassword");
       setError(`${err.message || "Admin API is unavailable. Start Django + MySQL to view live orders."} If this happens on Vercel, redeploy the Render backend after adding the Vercel URL to CORS_ALLOWED_ORIGINS.`);
     }
   }
@@ -834,7 +851,7 @@ function Stat({ label, value }) {
 
 function FloatingWhatsApp() {
   return (
-    <a className="whatsapp-float" href={`https://wa.me/${WHATSAPP_NUMBER}?text=Hi%20PrintForge%2C%20I%20need%20help%20with%20delivery%20or%20customization.`} target="_blank" rel="noreferrer" title="Contact on WhatsApp">
+    <a className="whatsapp-float" href={`https://wa.me/${WHATSAPP_NUMBER}?text=Hi%20${BRAND_NAME}%2C%20I%20need%20help%20with%20delivery%20or%20customization.`} target="_blank" rel="noreferrer" title="Contact on WhatsApp">
       <MessageCircle size={24} />
     </a>
   );
