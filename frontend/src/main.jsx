@@ -410,6 +410,10 @@ function Checkout({ cart, totals, quote, setQuote, updateQty, onClose, onClear }
       setMessage("Choose Razorpay or Cash on Delivery to place the order.");
       return;
     }
+    if (!addressReady) {
+      setMessage("Enter full address, city, state, and a valid 6 digit pincode before placing the order.");
+      return;
+    }
     setLoading(true);
     setMessage("");
     try {
@@ -419,7 +423,22 @@ function Checkout({ cart, totals, quote, setQuote, updateQty, onClose, onClear }
         body: JSON.stringify({
           customer,
           payment_method: paymentMethod,
-          items: cart.map((item) => ({ product_id: item.product.id, quantity: item.quantity, custom_note: item.custom_note })),
+          items: cart.map((item) => ({
+            product_id: item.product.id,
+            name: item.product.name,
+            category: item.product.category,
+            description: item.product.description,
+            material: item.product.material,
+            price: item.product.price,
+            rating: item.product.rating,
+            image: item.product.image,
+            stock: item.product.stock,
+            weight_grams: item.product.weight_grams,
+            is_featured: item.product.is_featured,
+            is_custom: item.product.is_custom,
+            quantity: item.quantity,
+            custom_note: item.custom_note,
+          })),
         }),
       });
       if (paymentMethod === "cod") {
@@ -510,7 +529,7 @@ function Checkout({ cart, totals, quote, setQuote, updateQty, onClose, onClear }
               <span>Total <b>{rupees(totals.total)}</b></span>
             </div>
             {message && <div className="message">{message}</div>}
-            <button className="btn wide-button" onClick={placeOrder} disabled={loading || !paymentMethod}>
+            <button className="btn wide-button" onClick={placeOrder} disabled={loading || !paymentMethod || !addressReady}>
               {paymentMethod === "cod" ? <PackageCheck size={18} /> : <CreditCard size={18} />}
               {!paymentMethod ? "Choose Payment Method" : paymentMethod === "cod" ? "Place COD Order" : "Pay with Razorpay"}
             </button>

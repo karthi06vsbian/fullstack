@@ -7,6 +7,7 @@ from django.db import transaction
 from django.db.models import Count, Sum
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
+from django.utils.text import slugify
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 
@@ -49,6 +50,54 @@ def product_json(product):
         "is_featured": product.is_featured,
         "is_custom": product.is_custom,
     }
+
+
+def unique_product_slug(name):
+    slug = slugify(name)[:180] or "product"
+    original = slug
+    counter = 2
+    while Product.objects.filter(slug=slug).exists():
+        slug = f"{original}-{counter}"[:200]
+        counter += 1
+    return slug
+
+
+def product_image_path(image):
+    clean = str(image or "").strip()
+    for prefix in ("/productsimg/", "productsimg/", "/media/", "media/"):
+        if clean.startswith(prefix):
+            return clean[len(prefix):]
+    return clean or "none"
+
+
+def product_from_order_item(item):
+    product_id = item.get("product_id")
+    try:
+        if product_id:
+            return Product.objects.get(id=int(product_id))
+    except (Product.DoesNotExist, TypeError, ValueError):
+        pass
+
+    name = str(item.get("name") or "Custom 3D Print").strip()[:180]
+    image = product_image_path(item.get("image"))
+    existing = Product.objects.filter(image=image).first()
+    if existing:
+        return existing
+
+    return Product.objects.create(
+        name=name,
+        slug=unique_product_slug(name),
+        category=str(item.get("category") or "Products").strip()[:80],
+        description=str(item.get("description") or "3D printed product ready for order or customization."),
+        material=str(item.get("material") or "PLA").strip()[:80],
+        price=Decimal(str(item.get("price") or 0)),
+        rating=Decimal(str(item.get("rating") or 4.8)),
+        image=image,
+        stock=max(20, int(item.get("stock") or 20)),
+        weight_grams=max(1, int(item.get("weight_grams") or 250)),
+        is_featured=bool(item.get("is_featured", False)),
+        is_custom=bool(item.get("is_custom", False)),
+    )
 
 
 def order_json(order):
@@ -134,17 +183,12 @@ def create_order(request):
     if not items:
         return JsonResponse({"error": "Cart is empty."}, status=400)
 
-    products_by_id = {
-        product.id: product for product in Product.objects.filter(id__in=[item.get("product_id") for item in items])
-    }
     subtotal = Decimal("0.00")
     weight = 0
     order_items = []
     for item in items:
-        product = products_by_id.get(int(item.get("product_id", 0)))
+        product = product_from_order_item(item)
         quantity = max(1, int(item.get("quantity", 1)))
-        if not product:
-            return JsonResponse({"error": "A product in the cart was not found."}, status=400)
         if quantity > product.stock:
             return JsonResponse({"error": f"Only {product.stock} available for {product.name}."}, status=400)
         subtotal += product.price * quantity
