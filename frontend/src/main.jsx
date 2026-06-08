@@ -706,7 +706,7 @@ function SiteFooter() {
         <h3>Credits</h3>
         <p>This website is built by Karthikeyan B.E CSE.</p>
         <p>Contact: +91 {CREDIT_CONTACT_NUMBER}</p>
-        <p>Instagram: @{CREDIT_INSTAGRAM_ID}</p>
+        <a href={`https://www.instagram.com/${CREDIT_INSTAGRAM_ID}/`} target="_blank" rel="noreferrer">Instagram: @{CREDIT_INSTAGRAM_ID}</a>
         <p>© {year} {BRAND_FULL_NAME}. All rights reserved.</p>
       </div>
     </footer>
