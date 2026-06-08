@@ -168,15 +168,16 @@ function App() {
 
       try {
         const data = await api("/products/");
-        const cleanedProducts = cleanProducts(data.products);
-        if (!cleanedProducts.length) {
+        const mergedProducts = adminProductCatalog(data.products || []).filter(hasUsableImage);
+        const hasBackendCatalogProducts = (data.products || []).some(hasUsableImage);
+        if (!mergedProducts.length) {
           useLocalCatalog("Backend connected. Render product database needs seeding, so the shop is showing the permanent local catalog.");
           return;
         }
-        const categoryList = [...new Set(cleanedProducts.map((product) => product.category))].sort();
-        setProducts(cleanedProducts);
+        const categoryList = [...new Set(mergedProducts.map((product) => product.category))].sort();
+        setProducts(mergedProducts);
         setCategories(["All", ...categoryList.filter((category) => category !== "Mini Me")]);
-        setNotice("");
+        setNotice(hasBackendCatalogProducts ? "" : "Backend connected. Render product database needs seeding, so the shop is showing the permanent local catalog.");
       } catch (error) {
         try {
           await api("/health/");
