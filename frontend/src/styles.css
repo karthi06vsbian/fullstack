@@ -284,8 +284,13 @@ h2 {
   margin-top: 64px;
 }
 
+.our-works-frame {
+  position: relative;
+}
+
 .our-works-slider {
   overflow: hidden;
+  scroll-behavior: smooth;
   padding-block: 4px;
 }
 
@@ -307,6 +312,35 @@ h2 {
   object-fit: cover;
   border-radius: 8px;
   background: var(--soft);
+}
+
+.works-arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ink);
+  box-shadow: 0 10px 26px rgba(15, 23, 42, 0.16);
+  transform: translateY(-50%);
+}
+
+.works-arrow-left {
+  left: 10px;
+}
+
+.works-arrow-right {
+  right: 10px;
+}
+
+.works-arrow:hover {
+  border-color: var(--blue);
+  color: var(--blue);
 }
 
 @keyframes works-slide {

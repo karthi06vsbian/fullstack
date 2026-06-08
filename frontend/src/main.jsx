@@ -1,6 +1,8 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import {
+  ChevronLeft,
+  ChevronRight,
   CreditCard,
   LayoutDashboard,
   MessageCircle,
@@ -385,7 +387,11 @@ function TopSellingSection({ products, onAdd, onBuy }) {
 }
 
 function OurWorksShowcase() {
+  const sliderRef = useRef(null);
   const showcaseImages = [...ourWorkImages, ...ourWorkImages];
+  const moveSlider = (direction) => {
+    sliderRef.current?.scrollBy({ left: direction * 320, behavior: "smooth" });
+  };
   return (
     <section className="our-works-section">
       <div className="shop-toolbar compact-toolbar">
@@ -394,12 +400,20 @@ function OurWorksShowcase() {
           <h2>Customization showcase.</h2>
         </div>
       </div>
-      <div className="our-works-slider">
+      <div className="our-works-frame">
+        <button className="works-arrow works-arrow-left" onClick={() => moveSlider(-1)} title="Move works left">
+          <ChevronLeft size={22} />
+        </button>
+        <button className="works-arrow works-arrow-right" onClick={() => moveSlider(1)} title="Move works right">
+          <ChevronRight size={22} />
+        </button>
+      <div className="our-works-slider" ref={sliderRef}>
         <div className="our-works-track">
           {showcaseImages.map((image, index) => (
             <img key={`${image}-${index}`} src={image} alt={`XTRUDE 3D custom work ${(index % ourWorkImages.length) + 1}`} loading="lazy" />
           ))}
         </div>
+      </div>
       </div>
     </section>
   );
