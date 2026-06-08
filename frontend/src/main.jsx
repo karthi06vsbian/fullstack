@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import "./styles.css";
 
-const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8000/api";
+const API_BASE = import.meta.env.VITE_API_BASE || "https://fullstack-zt6v.onrender.com";
 const MEDIA_BASE = API_BASE.replace("/api", "");
 const WHATSAPP_NUMBER = "919944823602";
 const PRODUCT_SUPPORT_NUMBER = "99448 23602";
