@@ -114,7 +114,12 @@ function App() {
       .then((data) => {
         const cleanedProducts = cleanProducts(data.products);
         if (!cleanedProducts.length) {
-          throw new Error("API returned no products.");
+          const localCatalog = cleanProducts(fallbackProducts);
+          const categoryList = [...new Set(localCatalog.map((product) => product.category))].sort();
+          setProducts(localCatalog);
+          setCategories(["All", ...categoryList.filter((category) => category !== "Mini Me")]);
+          setNotice("Backend connected, but Render database has no products yet. Showing permanent local product catalog.");
+          return;
         }
         const categoryList = [...new Set(cleanedProducts.map((product) => product.category))].sort();
         setProducts(cleanedProducts);

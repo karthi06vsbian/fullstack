@@ -80,6 +80,9 @@ CORS_ALLOWED_ORIGINS = environ.get(
     "CORS_ALLOWED_ORIGINS",
     "http://localhost:5173,http://127.0.0.1:5173",
 ).split(",")
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https://.*\.vercel\.app$",
+]
 CORS_ALLOW_HEADERS = (*default_headers, "x-admin-password")
 
 RAZORPAY_KEY_ID = environ.get("RAZORPAY_KEY_ID", "")
