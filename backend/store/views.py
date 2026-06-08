@@ -96,20 +96,8 @@ def apply_order_item_snapshot(product, item):
     return product
 
 
-def product_from_order_item(item):
-    product_id = item.get("product_id")
-    try:
-        if product_id:
-            return Product.objects.get(id=int(product_id))
-    except (Product.DoesNotExist, TypeError, ValueError):
-        pass
-
+def create_product_from_snapshot(item):
     name = str(item.get("name") or "Custom 3D Print").strip()[:180]
-    image = product_image_path(item.get("image"))
-    existing = Product.objects.filter(image=image).first()
-    if existing:
-        return apply_order_item_snapshot(existing, item)
-
     return Product.objects.create(
         name=name,
         slug=unique_product_slug(name),
@@ -118,12 +106,28 @@ def product_from_order_item(item):
         material=str(item.get("material") or "PLA").strip()[:80],
         price=order_item_price(item),
         rating=Decimal(str(item.get("rating") or 4.8)),
-        image=image,
+        image=product_image_path(item.get("image")),
         stock=max(20, int(item.get("stock") or 20)),
         weight_grams=max(1, int(item.get("weight_grams") or 250)),
         is_featured=bool(item.get("is_featured", False)),
         is_custom=bool(item.get("is_custom", False)),
     )
+
+
+def product_from_order_item(item):
+    product_id = item.get("product_id")
+    try:
+        if product_id:
+            return Product.objects.get(id=int(product_id))
+    except (Product.DoesNotExist, TypeError, ValueError):
+        pass
+
+    image = product_image_path(item.get("image"))
+    existing = Product.objects.filter(image=image).first()
+    if existing:
+        return apply_order_item_snapshot(existing, item)
+
+    return create_product_from_snapshot(item)
 
 
 def order_json(order):
@@ -376,3 +380,19 @@ def admin_update_product(request, product_id):
             return JsonResponse({"error": "Enter a valid price."}, status=400)
     product.save(update_fields=["name", "price"])
     return JsonResponse({"product": product_json(product)})
+
+
+@csrf_exempt
+@require_POST
+def admin_sync_product(request):
+    denied = require_admin(request)
+    if denied:
+        return denied
+    data = body_json(request)
+    image = product_image_path(data.get("image"))
+    product = Product.objects.filter(image=image).first()
+    if product:
+        product = apply_order_item_snapshot(product, data)
+    else:
+        product = create_product_from_snapshot(data)
+    return JsonResponse({"product": product_json(product)}, status=201)

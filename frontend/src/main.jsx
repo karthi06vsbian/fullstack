@@ -98,6 +98,53 @@ function cleanProducts(items) {
   return items.map(normalizeProduct).filter(hasUsableImage);
 }
 
+function productImageKey(image) {
+  return String(image || "")
+    .trim()
+    .replace(/^https?:\/\/[^/]+/, "")
+    .replace(/^\/?(media|productsimg)\//, "")
+    .toLowerCase();
+}
+
+function adminProductCatalog(backendProducts = []) {
+  const backend = backendProducts.map(normalizeProduct);
+  const backendByImage = new Map(backend.map((product) => [productImageKey(product.image), product]));
+  const usedBackendIds = new Set();
+  const localCatalog = fallbackProducts.map(normalizeProduct);
+
+  const merged = localCatalog.map((localProduct) => {
+    const imageKey = productImageKey(localProduct.image);
+    const backendProduct = backendByImage.get(imageKey);
+    if (backendProduct) {
+      usedBackendIds.add(backendProduct.id);
+      return {
+        ...localProduct,
+        ...backendProduct,
+        local_id: localProduct.id,
+        admin_key: `backend-${backendProduct.id}`,
+        local_only: false,
+      };
+    }
+    return {
+      ...localProduct,
+      id: `local-${localProduct.id}`,
+      local_id: localProduct.id,
+      admin_key: `local-${localProduct.id}`,
+      local_only: true,
+    };
+  });
+
+  const backendExtras = backend
+    .filter((product) => !usedBackendIds.has(product.id))
+    .map((product) => ({
+      ...product,
+      admin_key: `backend-${product.id}`,
+      local_only: false,
+    }));
+
+  return [...merged, ...backendExtras];
+}
+
 function App() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -239,7 +286,10 @@ function App() {
           onClear={() => setCart([])}
         />
       )}
-      {adminOpen && <AdminDashboard onClose={() => setAdminOpen(false)} onProductUpdated={(updated) => setProducts((items) => items.map((item) => item.id === updated.id ? normalizeProduct(updated) : item).filter(hasUsableImage))} />}
+      {adminOpen && <AdminDashboard onClose={() => setAdminOpen(false)} onProductUpdated={(updated, previousLocalId) => setProducts((items) => items.map((item) => {
+        const sameProduct = item.id === updated.id || item.id === previousLocalId || productImageKey(item.image) === productImageKey(updated.image);
+        return sameProduct ? normalizeProduct(updated) : item;
+      }).filter(hasUsableImage))} />}
     </div>
   );
 }
@@ -616,7 +666,7 @@ function AdminDashboard({ onClose, onProductUpdated }) {
     }
     try {
       const data = await api("/admin/summary/", { headers: { "X-Admin-Password": cleanPassword } });
-      setSummary({ ...data, products: (data.products || []).map(normalizeProduct) });
+      setSummary({ ...data, products: adminProductCatalog(data.products || []) });
       setAuthed(true);
       setPassword(cleanPassword);
       localStorage.setItem("printforgeAdminPassword", cleanPassword);
@@ -631,27 +681,47 @@ function AdminDashboard({ onClose, onProductUpdated }) {
     if (password) loadAdmin(password);
   }, []);
 
-  function updateProductDraft(productId, field, value) {
+  function updateProductDraft(productKey, field, value) {
     setSummary((current) => ({
       ...current,
-      products: current.products.map((product) => product.id === productId ? { ...product, [field]: value } : product),
+      products: current.products.map((product) => product.admin_key === productKey ? { ...product, [field]: value } : product),
     }));
   }
 
   async function saveProduct(product) {
-    setSavingId(product.id);
+    setSavingId(product.admin_key);
     setError("");
     try {
-      const data = await api(`/admin/products/${product.id}/`, {
+      const endpoint = product.local_only ? "/admin/products/sync/" : `/admin/products/${product.id}/`;
+      const body = product.local_only ? {
+        name: product.name,
+        price: product.price,
+        category: product.category,
+        description: product.description,
+        material: product.material,
+        rating: product.rating,
+        image: product.image,
+        stock: product.stock,
+        weight_grams: product.weight_grams,
+        is_featured: product.is_featured,
+        is_custom: product.is_custom,
+      } : { name: product.name, price: product.price };
+      const data = await api(endpoint, {
         method: "POST",
         headers: { "X-Admin-Password": password },
-        body: JSON.stringify({ name: product.name, price: product.price }),
+        body: JSON.stringify(body),
       });
+      const updatedProduct = normalizeProduct(data.product);
       setSummary((current) => ({
         ...current,
-        products: current.products.map((item) => item.id === data.product.id ? normalizeProduct(data.product) : item),
+        products: current.products.map((item) => item.admin_key === product.admin_key ? {
+          ...item,
+          ...updatedProduct,
+          admin_key: `backend-${updatedProduct.id}`,
+          local_only: false,
+        } : item),
       }));
-      onProductUpdated(normalizeProduct(data.product));
+      onProductUpdated(updatedProduct, product.local_id);
     } catch (err) {
       setError(err.message || "Could not save product.");
     } finally {
@@ -662,7 +732,7 @@ function AdminDashboard({ onClose, onProductUpdated }) {
   const stats = summary?.stats || { orders: 0, revenue: 0, products: 0, cod_orders: 0, razorpay_orders: 0 };
   const orders = summary?.recent_orders || [];
   const editableProducts = summary?.products || [];
-  const backendHasNoProducts = authed && editableProducts.length === 0;
+  const backendHasNoProducts = authed && (summary?.products || []).every((product) => product.local_only);
 
   return (
     <div className="drawer-backdrop">
@@ -686,7 +756,7 @@ function AdminDashboard({ onClose, onProductUpdated }) {
           <div className="admin-stats">
             <Stat label="Orders" value={stats.orders} />
             <Stat label="Total Amount" value={rupees(stats.revenue)} />
-            <Stat label="Products" value={stats.products} />
+            <Stat label="Admin Products" value={editableProducts.length} />
             <Stat label="COD Orders" value={stats.cod_orders} />
             <Stat label="Razorpay" value={stats.razorpay_orders} />
           </div>
@@ -718,32 +788,30 @@ function AdminDashboard({ onClose, onProductUpdated }) {
           </div>
           <div className="admin-section">
             <h3>Edit Products</h3>
-            <p className="admin-hint">Admin can edit the name and price for every product. Saved changes update the backend database and the shop catalog.</p>
+            <p className="admin-hint">Admin can edit the name and price for every local and backend product. Saving a local product adds it to the backend database.</p>
             {backendHasNoProducts && (
               <div className="message warning-message">
-                Product list was not found in the live backend database. Run `python manage.py migrate` and `python manage.py seed_products` in the Render backend shell, then reopen this admin panel.
+                Showing local product catalog in admin. Save any product to add it to the backend database with the edited name and price.
               </div>
             )}
-            {!backendHasNoProducts && (
-              <div className="product-editor-list">
+            <div className="product-editor-list">
                 {editableProducts.map((product) => (
-                  <article className="product-editor" key={product.id}>
+                  <article className="product-editor" key={product.admin_key}>
                     {hasUsableImage(product) ? <img src={imageUrl(product.image)} alt={product.name} /> : <div className="product-image-placeholder">No image</div>}
                     <label>
                       Name
-                      <input value={product.name} onChange={(event) => updateProductDraft(product.id, "name", event.target.value)} />
+                      <input value={product.name} onChange={(event) => updateProductDraft(product.admin_key, "name", event.target.value)} />
                     </label>
                     <label>
                       Price
-                      <input type="number" min="0" value={product.price} onChange={(event) => updateProductDraft(product.id, "price", event.target.value)} />
+                      <input type="number" min="0" value={product.price} onChange={(event) => updateProductDraft(product.admin_key, "price", event.target.value)} />
                     </label>
-                    <button className="btn secondary" onClick={() => saveProduct(product)} disabled={savingId === product.id}>
-                      {savingId === product.id ? "Saving" : "Save"}
+                    <button className="btn secondary" onClick={() => saveProduct(product)} disabled={savingId === product.admin_key}>
+                      {savingId === product.admin_key ? "Saving" : product.local_only ? "Add & Save" : "Save"}
                     </button>
                   </article>
                 ))}
               </div>
-            )}
           </div>
           </>
         )}

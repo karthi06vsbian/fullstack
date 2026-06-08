@@ -15,5 +15,6 @@ urlpatterns = [
     path("admin/login/", views.admin_login),
     path("admin/summary/", views.admin_summary),
     path("admin/orders/", views.admin_orders),
+    path("admin/products/sync/", views.admin_sync_product),
     path("admin/products/<int:product_id>/", views.admin_update_product),
 ]
