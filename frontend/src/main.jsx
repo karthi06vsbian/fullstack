@@ -15,7 +15,7 @@ import {
 import localProducts from "./localProducts";
 import "./styles.css";
 
-const API_BASE = import.meta.env.VITE_API_BASE || "http://127.0.0.1:8000/api";
+const API_BASE = import.meta.env.VITE_API_BASE || "https://fullstack-zt6v.onrender.com/api";
 const MEDIA_BASE = API_BASE.replace("/api", "");
 const WHATSAPP_NUMBER = "919944823602";
 const PRODUCT_SUPPORT_NUMBER = "99448 23602";
@@ -113,6 +113,9 @@ function App() {
     api("/products/")
       .then((data) => {
         const cleanedProducts = cleanProducts(data.products);
+        if (!cleanedProducts.length) {
+          throw new Error("API returned no products.");
+        }
         const categoryList = [...new Set(cleanedProducts.map((product) => product.category))].sort();
         setProducts(cleanedProducts);
         setCategories(["All", ...categoryList.filter((category) => category !== "Mini Me")]);
