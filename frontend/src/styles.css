@@ -454,6 +454,12 @@ h2 {
   margin-top: 22px;
 }
 
+.admin-hint {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-weight: 650;
+}
+
 .admin-table {
   display: grid;
   gap: 10px;
@@ -529,6 +535,20 @@ h2 {
   object-fit: cover;
   border-radius: 6px;
   background: var(--soft);
+}
+
+.product-image-placeholder {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--soft);
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-align: center;
 }
 
 .reviews-section {

@@ -607,7 +607,7 @@ function AdminDashboard({ onClose, onProductUpdated }) {
     }
     try {
       const data = await api("/admin/summary/", { headers: { "X-Admin-Password": cleanPassword } });
-      setSummary({ ...data, products: cleanProducts(data.products || []) });
+      setSummary({ ...data, products: (data.products || []).map(normalizeProduct) });
       setAuthed(true);
       setPassword(cleanPassword);
       localStorage.setItem("printforgeAdminPassword", cleanPassword);
@@ -707,6 +707,7 @@ function AdminDashboard({ onClose, onProductUpdated }) {
           </div>
           <div className="admin-section">
             <h3>Edit Products</h3>
+            <p className="admin-hint">Admin can edit the name and price for every product. Saved changes update the backend database and the shop catalog.</p>
             {backendHasNoProducts && (
               <div className="message warning-message">
                 Product list was not found in the live backend database. Run `python manage.py migrate` and `python manage.py seed_products` in the Render backend shell, then reopen this admin panel.
@@ -716,7 +717,7 @@ function AdminDashboard({ onClose, onProductUpdated }) {
               <div className="product-editor-list">
                 {editableProducts.map((product) => (
                   <article className="product-editor" key={product.id}>
-                    <img src={imageUrl(product.image)} alt={product.name} />
+                    {hasUsableImage(product) ? <img src={imageUrl(product.image)} alt={product.name} /> : <div className="product-image-placeholder">No image</div>}
                     <label>
                       Name
                       <input value={product.name} onChange={(event) => updateProductDraft(product.id, "name", event.target.value)} />

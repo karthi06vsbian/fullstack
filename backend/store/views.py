@@ -70,6 +70,32 @@ def product_image_path(image):
     return clean or "none"
 
 
+def order_item_price(item):
+    try:
+        price = Decimal(str(item.get("price") or 0))
+    except Exception:
+        price = Decimal("0")
+    return max(Decimal("0"), price)
+
+
+def apply_order_item_snapshot(product, item):
+    product.name = str(item.get("name") or product.name).strip()[:180] or product.name
+    product.price = order_item_price(item)
+    product.category = str(item.get("category") or product.category).strip()[:80] or product.category
+    product.description = str(item.get("description") or product.description)
+    product.material = str(item.get("material") or product.material).strip()[:80] or product.material
+    try:
+        product.rating = Decimal(str(item.get("rating") or product.rating))
+        product.stock = max(product.stock, int(item.get("stock") or product.stock))
+        product.weight_grams = max(1, int(item.get("weight_grams") or product.weight_grams))
+    except Exception:
+        pass
+    product.is_featured = bool(item.get("is_featured", product.is_featured))
+    product.is_custom = bool(item.get("is_custom", product.is_custom))
+    product.save(update_fields=["name", "price", "category", "description", "material", "rating", "stock", "weight_grams", "is_featured", "is_custom"])
+    return product
+
+
 def product_from_order_item(item):
     product_id = item.get("product_id")
     try:
@@ -82,7 +108,7 @@ def product_from_order_item(item):
     image = product_image_path(item.get("image"))
     existing = Product.objects.filter(image=image).first()
     if existing:
-        return existing
+        return apply_order_item_snapshot(existing, item)
 
     return Product.objects.create(
         name=name,
@@ -90,7 +116,7 @@ def product_from_order_item(item):
         category=str(item.get("category") or "Products").strip()[:80],
         description=str(item.get("description") or "3D printed product ready for order or customization."),
         material=str(item.get("material") or "PLA").strip()[:80],
-        price=Decimal(str(item.get("price") or 0)),
+        price=order_item_price(item),
         rating=Decimal(str(item.get("rating") or 4.8)),
         image=image,
         stock=max(20, int(item.get("stock") or 20)),
