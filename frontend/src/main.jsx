@@ -11,6 +11,7 @@ import {
   Plus,
   Search,
   ShoppingCart,
+  Trash2,
   Truck,
   Zap,
 } from "lucide-react";
@@ -94,7 +95,9 @@ function normalizeCategory(category) {
     pets: "Pets",
     projects: "Projects",
     toys: "Toys",
-    "useful appliances": "Useful Appliances",
+    organizer: "Organizer",
+    "custom names": "Custom Names",
+    "useful appliances": "Organizer",
     "mini me": "Mini Me",
   };
   return labels[String(category || "").trim().toLowerCase()] || category || "Products";
@@ -319,7 +322,7 @@ function App() {
       {adminOpen && <AdminDashboard onClose={() => setAdminOpen(false)} onProductUpdated={(updated, previousLocalId) => setProducts((items) => items.map((item) => {
         const sameProduct = item.id === updated.id || item.id === previousLocalId || productImageKey(item.image) === productImageKey(updated.image);
         return sameProduct ? normalizeProduct(updated) : item;
-      }).filter(hasUsableImage))} />}
+      }).filter(hasUsableImage))} onProductDeleted={(deleted) => setProducts((items) => items.filter((item) => item.id !== deleted.id && productImageKey(item.image) !== productImageKey(deleted.image)))} />}
     </div>
   );
 }
@@ -693,7 +696,7 @@ function SiteFooter() {
     <footer className="site-footer">
       <div>
         <h2>{BRAND_FULL_NAME}</h2>
-        <p>Premium 3D printed products, custom Mini Me models, keychains, toys, useful appliances, projects, home decor, and fast delivery support.</p>
+        <p>Premium 3D printed products, custom Mini Me models, keychains, toys, organizers, projects, home decor, and fast delivery support.</p>
       </div>
       <div>
         <h3>Contact</h3>
@@ -713,7 +716,7 @@ function SiteFooter() {
   );
 }
 
-function AdminDashboard({ onClose, onProductUpdated }) {
+function AdminDashboard({ onClose, onProductUpdated, onProductDeleted }) {
   const [summary, setSummary] = useState(null);
   const [password, setPassword] = useState(localStorage.getItem("xtrudeAdminPassword") || "");
   const [authed, setAuthed] = useState(false);
@@ -792,10 +795,48 @@ function AdminDashboard({ onClose, onProductUpdated }) {
     }
   }
 
+  async function deleteProduct(product) {
+    if (product.local_only) {
+      setError("Save this local product to the backend before deleting it.");
+      return;
+    }
+    setSavingId(product.admin_key);
+    setError("");
+    try {
+      const data = await api(`/admin/products/${product.id}/delete/`, {
+        method: "POST",
+        headers: { "X-Admin-Password": password },
+      });
+      const deletedProduct = normalizeProduct(data.product || product);
+      setSummary((current) => ({
+        ...current,
+        products: current.products.filter((item) => item.admin_key !== product.admin_key),
+        stats: current.stats ? { ...current.stats, products: Math.max(0, (current.stats.products || 1) - 1) } : current.stats,
+        category_counts: (current.category_counts || [])
+          .map((item) => normalizeCategory(item.category) === normalizeCategory(product.category) ? { ...item, count: Math.max(0, item.count - 1) } : item)
+          .filter((item) => item.count > 0),
+      }));
+      onProductDeleted(deletedProduct);
+    } catch (err) {
+      setError(err.message || "Could not delete product.");
+    } finally {
+      setSavingId(null);
+    }
+  }
+
   const stats = summary?.stats || { orders: 0, revenue: 0, products: 0, cod_orders: 0, razorpay_orders: 0 };
   const orders = summary?.recent_orders || [];
   const editableProducts = summary?.products || [];
   const backendHasNoProducts = authed && (summary?.products || []).every((product) => product.local_only);
+  const productsByCategory = useMemo(() => {
+    return editableProducts.reduce((groups, product) => {
+      const category = normalizeCategory(product.category);
+      if (!groups[category]) groups[category] = [];
+      groups[category].push(product);
+      return groups;
+    }, {});
+  }, [editableProducts]);
+  const mergedCategoryCounts = Object.entries(productsByCategory).map(([category, products]) => ({ category, count: products.length }));
 
   return (
     <div className="drawer-backdrop">
@@ -845,35 +886,50 @@ function AdminDashboard({ onClose, onProductUpdated }) {
           <div className="admin-section">
             <h3>Products by Category</h3>
             <div className="category-report">
-              {(summary?.category_counts || []).length === 0 ? <p className="empty">No product categories found in the backend database.</p> : (summary?.category_counts || []).map((item) => <span key={item.category}>{item.category}: <b>{item.count}</b></span>)}
+              {mergedCategoryCounts.length === 0 ? <p className="empty">No product categories found.</p> : mergedCategoryCounts.map((item) => <span key={item.category}>{item.category}: <b>{item.count}</b></span>)}
             </div>
           </div>
           <div className="admin-section">
             <h3>Edit Products</h3>
-            <p className="admin-hint">Admin can edit the name and price for every local and backend product. Saving a local product adds it to the backend database.</p>
+            <p className="admin-hint">Admin can edit the name and price for every product. Local products can be saved into the backend first, then deleted from the backend when needed.</p>
             {backendHasNoProducts && (
               <div className="message warning-message">
                 Showing local product catalog in admin. Save any product to add it to the backend database with the edited name and price.
               </div>
             )}
-            <div className="product-editor-list">
-                {editableProducts.map((product) => (
-                  <article className="product-editor" key={product.admin_key}>
-                    {hasUsableImage(product) ? <img src={imageUrl(product.image)} alt={product.name} /> : <div className="product-image-placeholder">No image</div>}
-                    <label>
-                      Name
-                      <input value={product.name} onChange={(event) => updateProductDraft(product.admin_key, "name", event.target.value)} />
-                    </label>
-                    <label>
-                      Price
-                      <input type="number" min="0" value={product.price} onChange={(event) => updateProductDraft(product.admin_key, "price", event.target.value)} />
-                    </label>
-                    <button className="btn secondary" onClick={() => saveProduct(product)} disabled={savingId === product.admin_key}>
-                      {savingId === product.admin_key ? "Saving" : product.local_only ? "Add & Save" : "Save"}
-                    </button>
-                  </article>
-                ))}
-              </div>
+            <div className="product-editor-groups">
+              {Object.entries(productsByCategory).map(([category, products]) => (
+                <section className="product-editor-group" key={category}>
+                  <div className="product-editor-category">
+                    <h4>{category}</h4>
+                    <span>{products.length} products</span>
+                  </div>
+                  <div className="product-editor-list">
+                    {products.map((product) => (
+                      <article className="product-editor" key={product.admin_key}>
+                        {hasUsableImage(product) ? <img src={imageUrl(product.image)} alt={product.name} /> : <div className="product-image-placeholder">No image</div>}
+                        <label>
+                          Name
+                          <input value={product.name} onChange={(event) => updateProductDraft(product.admin_key, "name", event.target.value)} />
+                        </label>
+                        <label>
+                          Price
+                          <input type="number" min="0" value={product.price} onChange={(event) => updateProductDraft(product.admin_key, "price", event.target.value)} />
+                        </label>
+                        <div className="product-editor-actions">
+                          <button className="btn secondary" onClick={() => saveProduct(product)} disabled={savingId === product.admin_key}>
+                            {savingId === product.admin_key ? "Saving" : product.local_only ? "Add & Save" : "Save"}
+                          </button>
+                          <button className="btn danger" onClick={() => deleteProduct(product)} disabled={savingId === product.admin_key || product.local_only} title={product.local_only ? "Save this product to backend before deleting" : "Delete product"}>
+                            <Trash2 size={16} /> Delete
+                          </button>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                </section>
+              ))}
+            </div>
           </div>
           </>
         )}

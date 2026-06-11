@@ -4,6 +4,7 @@ from urllib.parse import quote
 
 from django.conf import settings
 from django.db import transaction
+from django.db.models import ProtectedError
 from django.db.models import Count, Sum
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -388,6 +389,21 @@ def admin_update_product(request, product_id):
             return JsonResponse({"error": "Enter a valid price."}, status=400)
     product.save(update_fields=["name", "price"])
     return JsonResponse({"product": product_json(product)})
+
+
+@csrf_exempt
+@require_POST
+def admin_delete_product(request, product_id):
+    denied = require_admin(request)
+    if denied:
+        return denied
+    product = get_object_or_404(Product, id=product_id)
+    payload = product_json(product)
+    try:
+        product.delete()
+    except ProtectedError:
+        return JsonResponse({"error": "This product is already used in orders, so it cannot be deleted."}, status=400)
+    return JsonResponse({"deleted": True, "product": payload})
 
 
 @csrf_exempt
