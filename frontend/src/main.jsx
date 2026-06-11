@@ -690,6 +690,8 @@ function Reviews() {
     { name: "Karthik R", text: "The custom keychains looked sharp, and the WhatsApp updates made the whole order easy.", rating: "★★★★★" },
     { name: "Divya S", text: "I ordered a project model for college. Print quality was clean and delivery from Coimbatore was fast.", rating: "★★★★★" },
     { name: "Mohammed A", text: "Mini Me customization was handled nicely. They helped with size, finish, and final look before printing.", rating: "★★★★★" },
+    { name: "Harini P", text: "The organizer box was neat, strong, and exactly matched the color I asked for.", rating: "★★★★★" },
+    { name: "Santhosh V", text: "Loved the custom name plate finish. It looked premium and packed well for delivery.", rating: "★★★★★" },
   ];
   return (
     <section className="reviews-section">
@@ -698,8 +700,8 @@ function Reviews() {
         <h2>Custom orders, real smiles.</h2>
       </div>
       <div className="reviews-grid">
-        {reviews.map((review) => (
-          <article className="review-card" key={review.name}>
+        {reviews.map((review, index) => (
+          <article className="review-card" key={review.name} style={{ "--review-delay": `${index * 90}ms` }}>
             <strong>{review.rating}</strong>
             <p>{review.text}</p>
             <span>{review.name}</span>
