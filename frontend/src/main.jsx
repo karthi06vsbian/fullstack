@@ -471,6 +471,10 @@ function imageUrl(path) {
   if (!path) return "";
   if (path.startsWith("http")) return path;
   if (path.startsWith("/productsimg")) return path;
+  if (path.match(/^\/media\/(custom-names|home-decor|keychains|organizer|pets|projects|toys|useful-appliances)\//)) {
+    return path.replace("/media/", "/productsimg/");
+  }
+  if (path === "/media/minime.jpg") return "/productsimg/minime.jpg";
   if (path.startsWith("/media")) return `${MEDIA_BASE}${path}`;
   return path;
 }
