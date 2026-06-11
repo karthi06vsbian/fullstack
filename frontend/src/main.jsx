@@ -186,13 +186,13 @@ function App() {
         const mergedProducts = adminProductCatalog(data.products || []).filter(hasUsableImage);
         const hasBackendCatalogProducts = (data.products || []).some(hasUsableImage);
         if (!mergedProducts.length) {
-          useLocalCatalog(data.message || "Backend connected. Render product database needs seeding, so the shop is showing the permanent local catalog.");
+          useLocalCatalog("Backend connected. Render product database needs seeding, so the shop is showing the permanent local catalog.");
           return;
         }
         const categoryList = [...new Set(mergedProducts.map((product) => product.category))].sort();
         setProducts(mergedProducts);
         setCategories(["All", ...categoryList.filter((category) => category !== "Mini Me")]);
-        setNotice(hasBackendCatalogProducts ? "" : data.message || "Backend connected. Render product database needs seeding, so the shop is showing the permanent local catalog.");
+        setNotice(hasBackendCatalogProducts ? "" : "Backend connected. Render product database needs seeding, so the shop is showing the permanent local catalog.");
       } catch (error) {
         try {
           await api("/health/");

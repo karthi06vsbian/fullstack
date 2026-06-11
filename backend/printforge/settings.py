@@ -53,10 +53,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "printforge.wsgi.application"
 
-mysql_options = {"charset": "utf8mb4"}
-if environ.get("MYSQL_SSL_MODE", "").upper() == "REQUIRED":
-    mysql_options["ssl"] = {}
-
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
@@ -65,7 +61,7 @@ DATABASES = {
         "PASSWORD": environ.get("MYSQL_PASSWORD", ""),
         "HOST": environ.get("MYSQL_HOST", "127.0.0.1"),
         "PORT": environ.get("MYSQL_PORT", "3306"),
-        "OPTIONS": mysql_options,
+        "OPTIONS": {"charset": "utf8mb4"},
     }
 }
 

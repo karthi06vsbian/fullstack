@@ -3,7 +3,6 @@ from decimal import Decimal
 from urllib.parse import quote
 
 from django.conf import settings
-from django.db import DatabaseError
 from django.db import transaction
 from django.db.models import Count, Sum
 from django.http import JsonResponse
@@ -170,26 +169,18 @@ def health(_request):
 
 @require_GET
 def products(request):
-    try:
-        queryset = Product.objects.all()
-        category = request.GET.get("category")
-        search = request.GET.get("search")
-        featured = request.GET.get("featured")
-        if category:
-            queryset = queryset.filter(category__iexact=category)
-        if search:
-            queryset = queryset.filter(name__icontains=search)
-        if featured == "1":
-            queryset = queryset.filter(is_featured=True)
-        categories = list(Product.objects.values_list("category", flat=True).distinct().order_by("category"))
-        return JsonResponse({"products": [product_json(product) for product in queryset], "categories": categories})
-    except DatabaseError:
-        return JsonResponse({
-            "products": [],
-            "categories": [],
-            "database_available": False,
-            "message": "Database is not reachable. Showing local catalog fallback.",
-        })
+    queryset = Product.objects.all()
+    category = request.GET.get("category")
+    search = request.GET.get("search")
+    featured = request.GET.get("featured")
+    if category:
+        queryset = queryset.filter(category__iexact=category)
+    if search:
+        queryset = queryset.filter(name__icontains=search)
+    if featured == "1":
+        queryset = queryset.filter(is_featured=True)
+    categories = list(Product.objects.values_list("category", flat=True).distinct().order_by("category"))
+    return JsonResponse({"products": [product_json(product) for product in queryset], "categories": categories})
 
 
 @require_GET
