@@ -28,6 +28,7 @@ const CREDIT_INSTAGRAM_ID = "kxrxtxi__";
 const BRAND_NAME = "XTRUDE";
 const BRAND_FULL_NAME = "XTRUDE 3D";
 const CATALOG_PREVIEW_LIMIT = 8;
+const HIDDEN_PRODUCTS_KEY = "xtrudeHiddenProducts";
 const ourWorkImages = Array.from({ length: 15 }, (_, index) => `/our-works/work-${String(index + 1).padStart(2, "0")}.jpeg`);
 
 const fallbackProducts = localProducts;
@@ -123,11 +124,30 @@ function productImageKey(image) {
     .toLowerCase();
 }
 
+function hiddenProductKeys() {
+  try {
+    return new Set(JSON.parse(localStorage.getItem(HIDDEN_PRODUCTS_KEY) || "[]"));
+  } catch {
+    return new Set();
+  }
+}
+
+function rememberHiddenProduct(product) {
+  const hidden = hiddenProductKeys();
+  hidden.add(productImageKey(product.image));
+  localStorage.setItem(HIDDEN_PRODUCTS_KEY, JSON.stringify([...hidden]));
+}
+
+function removeHiddenProducts(items) {
+  const hidden = hiddenProductKeys();
+  return items.filter((product) => !hidden.has(productImageKey(product.image)));
+}
+
 function adminProductCatalog(backendProducts = []) {
   const backend = backendProducts.map(normalizeProduct);
   const backendByImage = new Map(backend.map((product) => [productImageKey(product.image), product]));
   const usedBackendIds = new Set();
-  const localCatalog = fallbackProducts.map(normalizeProduct);
+  const localCatalog = removeHiddenProducts(fallbackProducts.map(normalizeProduct));
 
   const merged = localCatalog.map((localProduct) => {
     const imageKey = productImageKey(localProduct.image);
@@ -159,7 +179,7 @@ function adminProductCatalog(backendProducts = []) {
       local_only: false,
     }));
 
-  return [...merged, ...backendExtras];
+  return removeHiddenProducts([...merged, ...backendExtras]);
 }
 
 function App() {
@@ -177,7 +197,7 @@ function App() {
   useEffect(() => {
     async function loadProducts() {
       const useLocalCatalog = (statusMessage) => {
-        const cleanedProducts = cleanProducts(fallbackProducts);
+        const cleanedProducts = removeHiddenProducts(cleanProducts(fallbackProducts));
         const categoryList = [...new Set(cleanedProducts.map((product) => product.category))].sort();
         setProducts(cleanedProducts);
         setCategories(["All", ...categoryList.filter((category) => category !== "Mini Me")]);
@@ -186,7 +206,7 @@ function App() {
 
       try {
         const data = await api("/products/");
-        const mergedProducts = adminProductCatalog(data.products || []).filter(hasUsableImage);
+        const mergedProducts = removeHiddenProducts(adminProductCatalog(data.products || []).filter(hasUsableImage));
         const hasBackendCatalogProducts = (data.products || []).some(hasUsableImage);
         if (!mergedProducts.length) {
           useLocalCatalog("Backend connected. Render product database needs seeding, so the shop is showing the permanent local catalog.");
@@ -797,7 +817,12 @@ function AdminDashboard({ onClose, onProductUpdated, onProductDeleted }) {
 
   async function deleteProduct(product) {
     if (product.local_only) {
-      setError("Save this local product to the backend before deleting it.");
+      rememberHiddenProduct(product);
+      setSummary((current) => ({
+        ...current,
+        products: current.products.filter((item) => item.admin_key !== product.admin_key),
+      }));
+      onProductDeleted(normalizeProduct(product));
       return;
     }
     setSavingId(product.admin_key);
@@ -891,7 +916,7 @@ function AdminDashboard({ onClose, onProductUpdated, onProductDeleted }) {
           </div>
           <div className="admin-section">
             <h3>Edit Products</h3>
-            <p className="admin-hint">Admin can edit the name and price for every product. Local products can be saved into the backend first, then deleted from the backend when needed.</p>
+            <p className="admin-hint">Admin can edit name and price, save local products to the backend, and remove products from the visible catalog.</p>
             {backendHasNoProducts && (
               <div className="message warning-message">
                 Showing local product catalog in admin. Save any product to add it to the backend database with the edited name and price.
@@ -920,8 +945,8 @@ function AdminDashboard({ onClose, onProductUpdated, onProductDeleted }) {
                           <button className="btn secondary" onClick={() => saveProduct(product)} disabled={savingId === product.admin_key}>
                             {savingId === product.admin_key ? "Saving" : product.local_only ? "Add & Save" : "Save"}
                           </button>
-                          <button className="btn danger" onClick={() => deleteProduct(product)} disabled={savingId === product.admin_key || product.local_only} title={product.local_only ? "Save this product to backend before deleting" : "Delete product"}>
-                            <Trash2 size={16} /> Delete
+                          <button className="btn danger" onClick={() => deleteProduct(product)} disabled={savingId === product.admin_key} title={product.local_only ? "Remove from visible local catalog" : "Delete product"}>
+                            <Trash2 size={16} /> {product.local_only ? "Remove" : "Delete"}
                           </button>
                         </div>
                       </article>
