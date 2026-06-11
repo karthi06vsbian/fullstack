@@ -31,6 +31,7 @@ CATEGORY_PRICE_RANGES = {
 
 PRODUCT_MATERIAL = "PLA+"
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
+EXCLUDED_IMAGES = {"home-decor/lamp-shade.jpg"}
 
 PRODUCT_NAMES = {
     "organizer/organizer-01.png": "Daily Reminder Tracker 7 Day Slider",
@@ -144,6 +145,8 @@ class Command(BaseCommand):
                 if image.suffix.lower() not in IMAGE_EXTENSIONS:
                     continue
                 relative = image.relative_to(root).as_posix()
+                if relative in EXCLUDED_IMAGES:
+                    continue
                 existing = Product.objects.filter(image=relative).first()
                 name = existing.name if existing else readable_name(Path(relative))
                 rng = image_rng(relative)

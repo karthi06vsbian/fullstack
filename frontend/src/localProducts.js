@@ -1,6 +1,5 @@
 const imagePaths = [
   "home-decor/desk-planter.jpg",
-  "home-decor/lamp-shade.jpg",
   "home-decor/wall-tile.jpg",
   "keychains/1761146287570.jpg",
   "keychains/20250225_081702.jpg",

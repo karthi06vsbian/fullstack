@@ -16,6 +16,8 @@ from .integrations import create_razorpay_order, create_shiprocket_order, verify
 from .models import Order, OrderItem, Product
 from .shipping import calculate_shipping
 
+EXCLUDED_PRODUCT_IMAGES = {"home-decor/lamp-shade.jpg"}
+
 
 def body_json(request):
     try:
@@ -170,7 +172,7 @@ def health(_request):
 
 @require_GET
 def products(request):
-    queryset = Product.objects.all()
+    queryset = Product.objects.exclude(image__in=EXCLUDED_PRODUCT_IMAGES)
     category = request.GET.get("category")
     search = request.GET.get("search")
     featured = request.GET.get("featured")
@@ -180,7 +182,7 @@ def products(request):
         queryset = queryset.filter(name__icontains=search)
     if featured == "1":
         queryset = queryset.filter(is_featured=True)
-    categories = list(Product.objects.values_list("category", flat=True).distinct().order_by("category"))
+    categories = list(Product.objects.exclude(image__in=EXCLUDED_PRODUCT_IMAGES).values_list("category", flat=True).distinct().order_by("category"))
     return JsonResponse({"products": [product_json(product) for product in queryset], "categories": categories})
 
 
@@ -338,19 +340,20 @@ def admin_summary(_request):
         return denied
     order_totals = Order.objects.aggregate(total_revenue=Sum("total"), total_orders=Count("id"))
     status_counts = list(Order.objects.values("status").annotate(count=Count("id")).order_by("status"))
-    category_counts = list(Product.objects.values("category").annotate(count=Count("id")).order_by("category"))
+    visible_products = Product.objects.exclude(image__in=EXCLUDED_PRODUCT_IMAGES)
+    category_counts = list(visible_products.values("category").annotate(count=Count("id")).order_by("category"))
     return JsonResponse({
         "stats": {
             "orders": order_totals["total_orders"] or 0,
             "revenue": float(order_totals["total_revenue"] or 0),
-            "products": Product.objects.count(),
+            "products": visible_products.count(),
             "cod_orders": Order.objects.filter(payment_method="cod").count(),
             "razorpay_orders": Order.objects.filter(payment_method="razorpay").count(),
         },
         "status_counts": status_counts,
         "category_counts": category_counts,
         "recent_orders": [order_json(order) for order in Order.objects.prefetch_related("items")[:8]],
-        "products": [product_json(product) for product in Product.objects.all()],
+        "products": [product_json(product) for product in visible_products],
     })
 
 

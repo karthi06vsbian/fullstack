@@ -29,6 +29,7 @@ const BRAND_NAME = "XTRUDE";
 const BRAND_FULL_NAME = "XTRUDE 3D";
 const CATALOG_PREVIEW_LIMIT = 8;
 const HIDDEN_PRODUCTS_KEY = "xtrudeHiddenProducts";
+const REMOVED_PRODUCT_KEYS = new Set(["home-decor/lamp-shade.jpg"]);
 const ourWorkImages = Array.from({ length: 15 }, (_, index) => `/our-works/work-${String(index + 1).padStart(2, "0")}.jpeg`);
 
 const fallbackProducts = localProducts;
@@ -126,9 +127,9 @@ function productImageKey(image) {
 
 function hiddenProductKeys() {
   try {
-    return new Set(JSON.parse(localStorage.getItem(HIDDEN_PRODUCTS_KEY) || "[]"));
+    return new Set([...REMOVED_PRODUCT_KEYS, ...JSON.parse(localStorage.getItem(HIDDEN_PRODUCTS_KEY) || "[]")]);
   } catch {
-    return new Set();
+    return new Set(REMOVED_PRODUCT_KEYS);
   }
 }
 
