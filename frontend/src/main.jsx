@@ -348,7 +348,7 @@ function App() {
 }
 
 function OfferTicker() {
-  const text = "🎉 All products up to 50% discount  🚚 Fast Shiprocket delivery  💳 Razorpay + COD available  🔥 Weekend combo offers  🎁 Custom gifts on WhatsApp";
+  const text = "🎉 All products up to 50% discount  💳 Online payment and COD available  🔥 Weekend combo offers  🎁 Custom gifts on WhatsApp";
   return (
     <div className="offer-ticker">
       <div className="offer-track"><span>{text}</span><span>{text}</span></div>
