@@ -1,5 +1,5 @@
 from pathlib import Path
-from os import environ
+import os
 
 from corsheaders.defaults import default_headers
 from dotenv import load_dotenv
@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 ROOT_DIR = BASE_DIR.parent
 load_dotenv(BASE_DIR / ".env")
+environ = os.environ
 
 SECRET_KEY = environ.get("DJANGO_SECRET_KEY", "dev-only-change-me")
 DEBUG = environ.get("DJANGO_DEBUG", "1") == "1"
@@ -53,15 +54,19 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "printforge.wsgi.application"
 
+database_options = {"charset": "utf8mb4"}
+if os.environ.get("MYSQL_SSL_MODE", "").upper() == "REQUIRED":
+    database_options["ssl"] = {}
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": environ.get("MYSQL_DATABASE", "printforge"),
-        "USER": environ.get("MYSQL_USER", "root"),
-        "PASSWORD": environ.get("MYSQL_PASSWORD", ""),
-        "HOST": environ.get("MYSQL_HOST", "127.0.0.1"),
-        "PORT": environ.get("MYSQL_PORT", "3306"),
-        "OPTIONS": {"charset": "utf8mb4"},
+        "NAME": os.environ.get("MYSQL_DATABASE"),
+        "USER": os.environ.get("MYSQL_USER"),
+        "PASSWORD": os.environ.get("MYSQL_PASSWORD"),
+        "HOST": os.environ.get("MYSQL_HOST"),
+        "PORT": os.environ.get("MYSQL_PORT"),
+        "OPTIONS": database_options,
     }
 }
 
