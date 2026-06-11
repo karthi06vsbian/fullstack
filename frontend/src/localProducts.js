@@ -158,7 +158,7 @@ const priceRanges = {
   Toys: [199, 999],
 };
 
-const materials = ["PLA", "Matte PLA", "Silk PLA", "PETG"];
+const PRODUCT_MATERIAL = "PLA+";
 
 const productNames = {
   "organizer/organizer-01.png": "Daily Reminder Tracker 7 Day Slider",
@@ -236,7 +236,7 @@ const localProducts = [
     price: 0,
     rating: 4.9,
     image: "/productsimg/minime.jpg",
-    material: "Resin / PLA",
+    material: PRODUCT_MATERIAL,
     weight_grams: 350,
     is_featured: true,
     is_custom: true,
@@ -253,7 +253,7 @@ const localProducts = [
       price: stablePrice(category, path),
       rating: 4.5 + ((hash % 5) / 10),
       image: `/productsimg/${path}`,
-      material: materials[hash % materials.length],
+      material: PRODUCT_MATERIAL,
       weight_grams: 180 + (hash % 620),
       is_featured: index % 9 === 0,
       is_custom: category === "Projects" || category === "Custom Names",

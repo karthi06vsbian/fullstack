@@ -447,7 +447,7 @@ function Hero({ onShop }) {
   return (
     <header className="hero">
       <video autoPlay muted loop playsInline poster="https://images.unsplash.com/photo-1631378426482-54edfe73115b?auto=format&fit=crop&w=2200&q=82">
-        <source src={`${MEDIA_BASE}/assets/video/3d-printer-entrance.mp4`} type="video/mp4" />
+        <source src="/assets/video/3d-printer-entrance.mp4" type="video/mp4" />
       </video>
       <div className="hero-copy">
         <p className="eyebrow">Premium 3D Printing Studio</p>

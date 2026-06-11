@@ -29,7 +29,7 @@ CATEGORY_PRICE_RANGES = {
     "Toys": (199, 999),
 }
 
-MATERIALS = ["PLA", "Matte PLA", "Silk PLA", "PETG"]
+PRODUCT_MATERIAL = "PLA+"
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
 
 PRODUCT_NAMES = {
@@ -127,7 +127,7 @@ class Command(BaseCommand):
                     "price": 0,
                     "image": "minime.jpg",
                     "description": "Fully customized 3D miniature from your photo. Quote shared on WhatsApp.",
-                    "material": "Resin / PLA",
+                    "material": PRODUCT_MATERIAL,
                     "weight_grams": 350,
                     "is_featured": True,
                     "is_custom": True,
@@ -155,7 +155,7 @@ class Command(BaseCommand):
                         "category": category,
                         "price": existing.price if existing else stable_price(category, image),
                         "description": f"3D printed {category.lower()} item ready for order or customization.",
-                        "material": existing.material if existing else MATERIALS[rng.randrange(len(MATERIALS))],
+                        "material": PRODUCT_MATERIAL,
                         "weight_grams": existing.weight_grams if existing else rng.randrange(180, 801),
                         "rating": existing.rating if existing else 4.5 + (rng.randrange(0, 5) / 10),
                         "is_featured": existing.is_featured if existing else seeded % 9 == 0,

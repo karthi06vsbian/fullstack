@@ -104,7 +104,7 @@ def create_product_from_snapshot(item):
         slug=unique_product_slug(name),
         category=str(item.get("category") or "Products").strip()[:80],
         description=str(item.get("description") or "3D printed product ready for order or customization."),
-        material=str(item.get("material") or "PLA").strip()[:80],
+        material=str(item.get("material") or "PLA+").strip()[:80],
         price=order_item_price(item),
         rating=Decimal(str(item.get("rating") or 4.8)),
         image=product_image_path(item.get("image")),
