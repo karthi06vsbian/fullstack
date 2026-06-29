@@ -227,12 +227,17 @@ function stablePrice(category, path) {
   return low + ((hashText(path) % stepCount) * 10);
 }
 
+function compareAtPrice(price) {
+  return price > 0 ? price + 20 : 0;
+}
+
 const localProducts = [
   {
     id: 1,
     name: "Mini Me Custom Figure",
     category: "Mini Me",
     price: 0,
+    compare_at_price: 0,
     rating: 4.9,
     image: "/productsimg/minime.jpg",
     material: PRODUCT_MATERIAL,
@@ -245,11 +250,13 @@ const localProducts = [
     const folder = path.split("/")[0];
     const category = categoryLabels[folder] || "Products";
     const hash = hashText(path);
+    const price = stablePrice(category, path);
     return {
       id: 1000 + index,
       name: readableName(path),
       category,
-      price: stablePrice(category, path),
+      price,
+      compare_at_price: compareAtPrice(price),
       rating: 4.5 + ((hash % 5) / 10),
       image: `/productsimg/${path}`,
       material: PRODUCT_MATERIAL,

@@ -11,7 +11,7 @@ class OrderItemInline(admin.TabularInline):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ("name", "category", "price", "stock", "is_featured", "is_custom")
+    list_display = ("name", "category", "price", "compare_at_price", "stock", "is_featured", "is_custom")
     list_filter = ("category", "is_featured", "is_custom")
     search_fields = ("name", "category", "material")
     prepopulated_fields = {"slug": ("name",)}

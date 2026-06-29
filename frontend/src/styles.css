@@ -400,8 +400,8 @@ h2 {
 
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(245px, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
 }
 
 .catalog-actions {
@@ -431,7 +431,7 @@ h2 {
 
 .product-image {
   position: relative;
-  aspect-ratio: 1 / 0.82;
+  aspect-ratio: 1 / 1;
   background: #f0f0f0;
   overflow: hidden;
 }
@@ -464,31 +464,61 @@ h2 {
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: 12px;
-  padding: 16px;
+  gap: 10px;
+  padding: 12px;
 }
 
 .product-body p {
   margin-bottom: 0;
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: 0.8rem;
 }
 
 .product-body h3 {
-  min-height: 2.5em;
+  min-height: 2.4em;
   margin-bottom: 0;
-  font-size: 1.05rem;
+  font-size: 0.92rem;
 }
 
 .description {
-  min-height: 2.7em;
+  min-height: 2.4em;
+  font-size: 0.8rem;
 }
 
 .product-meta {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
+}
+
+.product-price-block {
+  display: grid;
+  gap: 4px;
   margin-top: auto;
+}
+
+.price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.price-row s {
+  color: #64748b;
+  font-weight: 650;
+  text-decoration-thickness: 2px;
+}
+
+.price-row strong {
+  color: #0f172a;
+  font-size: 1.08rem;
+}
+
+.product-body .save-message {
+  color: #dc2626;
+  font-size: 0.9rem;
+  font-weight: 750;
 }
 
 @keyframes product-card-enter {
@@ -680,7 +710,7 @@ h2 {
 
 .product-editor {
   display: grid;
-  grid-template-columns: 72px minmax(180px, 1fr) 120px minmax(190px, auto);
+  grid-template-columns: 72px minmax(160px, 1fr) 110px 130px minmax(190px, auto);
   gap: 10px;
   align-items: end;
   padding: 10px;

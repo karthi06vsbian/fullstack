@@ -8,6 +8,7 @@ class Product(models.Model):
     description = models.TextField(blank=True)
     material = models.CharField(max_length=80, default="PLA")
     price = models.DecimalField(max_digits=10, decimal_places=2)
+    compare_at_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     rating = models.DecimalField(max_digits=3, decimal_places=1, default=4.8)
     image = models.CharField(max_length=255)
     stock = models.PositiveIntegerField(default=25)

@@ -1109,7 +1109,7 @@ const formatPrice = (value) => `${storefrontSettings.currency_symbol || "₹"}${
 const categorySlug = (value = "") => value.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 const cartStorageKey = "printforge_cart";
 const shippingNote = "Shipping charge depends on your delivery location.";
-const codNote = "Cash on Delivery is available.";
+const orderNote = "Online payment is available after WhatsApp confirmation.";
 const assetUrl = (path = "") => {
   try {
     return new URL(path, window.location.href).href;
@@ -1117,7 +1117,7 @@ const assetUrl = (path = "") => {
     return path;
   }
 };
-const whatsappLink = (product = "custom 3D print") => `https://wa.me/${storefrontSettings.whatsapp_number || "638326318"}?text=${encodeURIComponent(`Hi, I want to customize a ${product}. ${codNote} ${shippingNote}`)}`;
+const whatsappLink = (product = "custom 3D print") => `https://wa.me/${storefrontSettings.whatsapp_number || "638326318"}?text=${encodeURIComponent(`Hi, I want to customize a ${product}. ${orderNote} ${shippingNote}`)}`;
 const productWhatsappLink = (product) => {
   const text = [
     "Hi, I want to order this 3D printed product.",
@@ -1126,7 +1126,7 @@ const productWhatsappLink = (product) => {
     `Category: ${product.category}`,
     `Material: ${product.material}`,
     `Product image: ${assetUrl(product.image)}`,
-    codNote,
+    orderNote,
     shippingNote
   ].join("\n");
   return `https://wa.me/${storefrontSettings.whatsapp_number || "638326318"}?text=${encodeURIComponent(text)}`;
@@ -1158,14 +1158,6 @@ function buildNav() {
   const nav = document.querySelector("[data-nav]");
   if (!nav) return;
   nav.innerHTML = `
-    <div class="offer-bar" aria-label="Current offer">
-      <div class="offer-track">
-        <span>🔥 All products are 50% off - buy soon! 🏃‍♂️💨</span>
-        <span>📱 Custom 3D prints available on WhatsApp ✨</span>
-        <span>🎉 Limited time launch offer on keychains, toys, useful appliances, projects, and decor 🎁</span>
-        <span>🔥 All products are 50% off - buy soon! 🏃‍♂️💨</span>
-      </div>
-    </div>
     <div class="container nav-inner">
       <a class="logo" href="index.html">${brandMarkup()}</a>
       <div class="nav-links">
@@ -1252,7 +1244,7 @@ function productCard(product) {
         <div class="rating">★★★★★ ${product.rating}</div>
         <h3>${product.title}</h3>
         <p class="product-meta">${product.category} · ${product.material}</p>
-        <p class="product-meta">${codNote} ${shippingNote}</p>
+        <p class="product-meta">${orderNote} ${shippingNote}</p>
         <div class="price">${product.compareAtPrice ? `<span>${formatPrice(product.price)}</span><s>${formatPrice(product.compareAtPrice)}</s>` : formatPrice(product.price)}</div>
         <div class="product-actions">
           <button class="btn" data-add-cart="${product.id}">Add to Cart</button>
@@ -1462,7 +1454,7 @@ function renderProductDetail() {
       <h2>${formatPrice(product.price)}</h2>
       <p>Printed on demand with calibrated layer height, premium filament, and careful finishing. Send your name, logo, reference image, or STL file and we will confirm feasibility on WhatsApp.</p>
       <p class="product-meta">Material: ${product.material} · Source inspiration: <a href="${product.source}" target="_blank" rel="noopener">Printables</a></p>
-      <p class="product-meta">${codNote} ${shippingNote}</p>
+      <p class="product-meta">${orderNote} ${shippingNote}</p>
 
       <h3>Quantity</h3>
       <div class="quantity" data-quantity><button data-minus>-</button><span>1</span><button data-plus>+</button></div>
@@ -1568,7 +1560,7 @@ function initCheckout() {
       `Address: ${data.address || ""}, ${data.city || ""} ${data.postal_code || ""}`.trim(),
       `Products: ${summaryForOrder.items}`,
       `Product price total: ${formatPrice(summaryForOrder.total)}`,
-      codNote,
+      orderNote,
       shippingNote,
       "Please confirm the final shipping charge for my location."
     ].join("\n");

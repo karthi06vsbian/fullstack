@@ -46,6 +46,7 @@ def product_json(product):
         "description": product.description,
         "material": product.material,
         "price": float(product.price),
+        "compare_at_price": float(product.compare_at_price) if product.compare_at_price is not None else None,
         "rating": float(product.rating),
         "image": f"/media/{product.image}",
         "stock": product.stock,
@@ -81,9 +82,20 @@ def order_item_price(item):
     return max(Decimal("0"), price)
 
 
+def order_item_compare_at_price(item, price=None):
+    try:
+        compare_at_price = Decimal(str(item.get("compare_at_price") or item.get("compareAtPrice") or 0))
+    except Exception:
+        compare_at_price = Decimal("0")
+    if price is None:
+        price = order_item_price(item)
+    return compare_at_price if compare_at_price > price else None
+
+
 def apply_order_item_snapshot(product, item):
     product.name = str(item.get("name") or product.name).strip()[:180] or product.name
     product.price = order_item_price(item)
+    product.compare_at_price = order_item_compare_at_price(item, product.price)
     product.category = str(item.get("category") or product.category).strip()[:80] or product.category
     product.description = str(item.get("description") or product.description)
     product.material = str(item.get("material") or product.material).strip()[:80] or product.material
@@ -95,19 +107,21 @@ def apply_order_item_snapshot(product, item):
         pass
     product.is_featured = bool(item.get("is_featured", product.is_featured))
     product.is_custom = bool(item.get("is_custom", product.is_custom))
-    product.save(update_fields=["name", "price", "category", "description", "material", "rating", "stock", "weight_grams", "is_featured", "is_custom"])
+    product.save(update_fields=["name", "price", "compare_at_price", "category", "description", "material", "rating", "stock", "weight_grams", "is_featured", "is_custom"])
     return product
 
 
 def create_product_from_snapshot(item):
     name = str(item.get("name") or "Custom 3D Print").strip()[:180]
+    price = order_item_price(item)
     return Product.objects.create(
         name=name,
         slug=unique_product_slug(name),
         category=str(item.get("category") or "Products").strip()[:80],
         description=str(item.get("description") or "3D printed product ready for order or customization."),
         material=str(item.get("material") or "PLA+").strip()[:80],
-        price=order_item_price(item),
+        price=price,
+        compare_at_price=order_item_compare_at_price(item, price),
         rating=Decimal(str(item.get("rating") or 4.8)),
         image=product_image_path(item.get("image")),
         stock=max(20, int(item.get("stock") or 20)),
@@ -390,7 +404,13 @@ def admin_update_product(request, product_id):
             product.price = Decimal(str(data["price"]))
         except Exception:
             return JsonResponse({"error": "Enter a valid price."}, status=400)
-    product.save(update_fields=["name", "price"])
+    if "compare_at_price" in data:
+        try:
+            compare_at_price = Decimal(str(data["compare_at_price"] or 0))
+        except Exception:
+            return JsonResponse({"error": "Enter a valid striked price."}, status=400)
+        product.compare_at_price = compare_at_price if compare_at_price > product.price else None
+    product.save(update_fields=["name", "price", "compare_at_price"])
     return JsonResponse({"product": product_json(product)})
 
 
