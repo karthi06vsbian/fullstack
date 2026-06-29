@@ -59,8 +59,18 @@ a { color: inherit; text-decoration: none; }
 }
 
 .logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 1.2rem;
   font-weight: 850;
+}
+
+.nav-logo-icon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  border-radius: 50%;
 }
 
 .logo span { color: var(--muted); font-weight: 600; }

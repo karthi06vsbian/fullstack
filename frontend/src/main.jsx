@@ -355,7 +355,10 @@ Image: ${window.location.origin}${imageUrl(product.image)}`;
 function Nav({ cartCount, onCart, onAdmin }) {
   return (
     <nav className="nav">
-      <a className="logo" href="#">{BRAND_NAME}<span> 3D</span></a>
+      <a className="logo" href="#">
+        <img src="/favicon.png" alt="XTRUDE 3D Logo" className="nav-logo-icon" />
+        {BRAND_NAME}<span> 3D</span>
+      </a>
       <div className="nav-links">
         <a href="#shop">Shop</a>
         <button className="admin-link" onClick={onAdmin}><LayoutDashboard size={18} /> Admin</button>
